@@ -1,0 +1,4 @@
+github.com/jtorz/num-a-letra v0.0.0-20190228064825-21346932aaa0 h1:3O42/XedUcRSdcYrIw4SLDtX10RLh8hfd9RkjodurJI=
+github.com/jtorz/num-a-letra v0.0.0-20190228064825-21346932aaa0/go.mod h1:OC+jfSGL5tas3wC0bw6LgcKXgfX9BgiqIujSgyX0wFo=
+golang.org/x/text v0.16.0 h1:a94ExnEXNtEwYLGJSIUxnWoxoRz/ZcCsV63ROupILh4=
+golang.org/x/text v0.16.0/go.mod h1:GhwF1Be+LQoKShO3cGOHzqOgRrGaYc9AvblQOmPVHnI=
