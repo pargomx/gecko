@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"monorepo/gecko"
+	"github.com/pargomx/gecko"
 )
 
 // TemplateResponder prepara plantillas html y las ejecuta con

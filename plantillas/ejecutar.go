@@ -2,8 +2,9 @@ package plantillas
 
 import (
 	"io"
-	"monorepo/gecko"
 	"strings"
+
+	"github.com/pargomx/gecko"
 )
 
 // Render satisface la interfaz gecko.Renderer

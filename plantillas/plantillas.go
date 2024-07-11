@@ -4,7 +4,7 @@ import (
 	"html/template"
 	"os"
 
-	"monorepo/gecko"
+	"github.com/pargomx/gecko"
 )
 
 // TemplateResponder prepara plantillas html y las ejecuta con

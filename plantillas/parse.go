@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"monorepo/gecko"
+	"github.com/pargomx/gecko"
 )
 
 // Camina por el directorio especificado y prepara todas las
