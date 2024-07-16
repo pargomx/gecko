@@ -1,9 +1,13 @@
 package gecko
 
 import (
+	"fmt"
 	"io/fs"
+	"net"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 // Gecko es un servidor web simple basado en la librería estándar de Go 1.22.
@@ -19,7 +23,6 @@ import (
 //   - Solicitudes "/hola" y "/hola/" usarán el mismo handler.
 //   - Solicitud "/hola/x/y/z" no usará el handler de "/hola/".
 type Gecko struct {
-	addr             string
 	mux              *http.ServeMux
 	IPExtractor      IPExtractor
 	Renderer         Renderer
@@ -37,8 +40,14 @@ type Gecko struct {
 	TmplBaseLayout string
 }
 
-// HTTPErrorHandler is a centralized HTTP error handler.
-type HTTPErrorHandler func(err error, c *Context)
+// Implementa la interfaz http.Handler.
+func (g *Gecko) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// Middleware global.
+	quitarTrailingSlash(r)
+	// fmt.Println("Sirviendo", r.Method, r.URL.Path)
+	// Proceder con el router de la librería estándar.
+	g.mux.ServeHTTP(w, r)
+}
 
 // Nuevo servidor escuchando en :8080.
 func New() *Gecko {
@@ -46,10 +55,8 @@ func New() *Gecko {
 	if err != nil {
 		FatalErr(err)
 	}
-
 	return &Gecko{
-		addr: ":8080",
-		mux:  http.NewServeMux(),
+		mux: http.NewServeMux(),
 
 		Filesystem: os.DirFS(pwd),
 
@@ -62,22 +69,40 @@ func New() *Gecko {
 }
 
 // Inicia el servidor HTTP.
-func (g *Gecko) IniciarServidor() error {
+func (g *Gecko) IniciarEnPuerto(port int) error {
+	if port < 1 || port > 65535 {
+		return ErrNotAcceptable.Msg("puerto TCP inválido")
+	}
 	srv := http.Server{
-		Addr:    g.addr,
+		Addr:    fmt.Sprintf(":%d", port),
 		Handler: g,
 	}
+	LogEventof("Escuchando en tcp/%d", port)
 	return srv.ListenAndServe()
 }
 
-// Implementa la interfaz http.Handler.
-func (g *Gecko) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	// Middleware global.
-	quitarTrailingSlash(r)
-
-	// fmt.Println("Sirviendo", r.Method, r.URL.Path)
-
-	// Proceder con el router de la librería estándar.
-	g.mux.ServeHTTP(w, r)
+// Create a Unix domain sock and listen for incoming connections.
+func (g *Gecko) IniciarEnSocket(socket string) error {
+	if socket == "" {
+		return ErrNotAcceptable.Msg("socket path indefinido")
+	}
+	sock, err := net.Listen("unix", socket)
+	if err != nil {
+		return err
+	}
+	// Cleanup the socket file.
+	exitChan := make(chan os.Signal, 1)
+	signal.Notify(exitChan, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-exitChan
+		err = os.Remove(socket)
+		if err != nil {
+			LogError(err)
+		} else {
+			LogInfof("socket removido %v", socket)
+		}
+		os.Exit(0)
+	}()
+	LogEventof("Escuchando en unix %v", socket)
+	return http.Serve(sock, g)
 }
