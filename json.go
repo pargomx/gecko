@@ -16,6 +16,9 @@ func (c *Context) JSONUnmarshal(v any) error {
 	return err
 }
 
+// ================================================================ //
+// ========== ENVIAR JSON ========================================= //
+
 // Serialize converts an interface into a json and writes it to the response.
 // You can optionally use the indent parameter to produce pretty JSONs.
 func jsonSerialize(c *Context, i interface{}, indent string) error {
@@ -25,20 +28,6 @@ func jsonSerialize(c *Context, i interface{}, indent string) error {
 	}
 	return enc.Encode(i)
 }
-
-// Deserialize reads a JSON from a request body and converts it into an interface.
-func jsonDeserialize(c *Context, i interface{}) error {
-	err := json.NewDecoder(c.Request().Body).Decode(i)
-	if ute, ok := err.(*json.UnmarshalTypeError); ok {
-		return NewErr(http.StatusBadRequest).Msgf("Unmarshal type error: expected=%v, got=%v, field=%v, offset=%v", ute.Type, ute.Value, ute.Field, ute.Offset).Err(err)
-	} else if se, ok := err.(*json.SyntaxError); ok {
-		return NewErr(http.StatusBadRequest).Msgf("Syntax error: offset=%v, error=%v", se.Offset, se.Error()).Err(err)
-	}
-	return err
-}
-
-// ================================================================ //
-// ========== ENVIAR JSON ========================================= //
 
 // Responder con MIME "application/json" UTF8.
 //

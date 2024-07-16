@@ -9,6 +9,9 @@ import (
 // de cada entrada de log al Stdout.
 var PrintLogTimestamps bool = true
 
+// Si se imprime el mensaje de los errores.
+var MostrarMensajeEnErrores bool = false
+
 // 2020-11-25 18:54:32 [DEBUG] Algo interesante sucede cyan.
 func (c *Context) LogDebug(a ...any) {
 	println(timestamp() + cCyan + "[DEBUG] " + rWhite + fmt.Sprint(a...) + reset)

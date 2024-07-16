@@ -5,8 +5,8 @@ import (
 	"net/url"
 )
 
-// Representa la solicitud HTTP actual y
-// ofrece los medios para responderla.
+// Representa a la solicitud HTTP actual
+// y ofrece los medios para responderla.
 type Context struct {
 	request  *http.Request
 	response *Response
