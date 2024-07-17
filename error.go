@@ -23,6 +23,33 @@ type Gkerror struct {
 	err error
 }
 
+var (
+	// _ = iota
+
+	ErrInesperado = NewErr(1) // Error desconocido, normalmente de una dependencia externa.
+
+	ErrNoEncntrado  = NewErr(2) // No se encuentra un registro por su ID.
+	ErrYaExiste     = NewErr(3) // Ya existe un recurson con el mismo ID.
+	ErrHayHuerfanos = NewErr(4) // No se puede borrar porque tiene hijos.
+
+	ErrTooManyReq = NewErr(5) // Se esperaba un solo registro y se encontraron muchos.
+	ErrTooBig     = NewErr(6) // Un archivo es demasiado pesado.
+	ErrTooLong    = NewErr(7) // Un string es demasiado largo.
+
+	ErrDatoIndef    = NewErr(8) // Un dato es obligatorio y no se recibió.
+	ErrDatoInvalido = NewErr(9) // Un dato no cumple con las reglas de validación.
+
+	ErrNoAutorizado = NewErr(10) // Un usuario no tiene permisos para realizar una acción.
+
+	ErrTimeout      = NewErr(11) // Una operación tarda más de lo esperado.
+	ErrNoDisponible = NewErr(12) // Un servicio no está disponible.
+
+	ErrNoSpaceLeft = NewErr(13) // Se alcanzó la capacidad máxima.
+	ErrAlEscribir  = NewErr(14) // Error al escribir en un archivo.
+	ErrAlLeer      = NewErr(15) // Error al leer un archivo.
+
+)
+
 // Errors
 var (
 	ErrBadRequest                    = NewErr(http.StatusBadRequest)                    // HTTP 400 Bad Request
@@ -106,6 +133,11 @@ func (e *Gkerror) Error() string {
 		msg += " {" + e.contexto + "}"
 	}
 	return msg
+}
+
+// Log imprime el error en la salida estándar.
+func (e *Gkerror) Log() {
+	LogError(e)
 }
 
 // ================================================================ //
@@ -202,7 +234,7 @@ func (e *Gkerror) Err(err error) *Gkerror {
 		if e.operación == "" {
 			e.operación = ne.operación
 		} else {
-			e.operación = ne.operación + " > " + e.operación
+			e.operación = e.operación + " > " + ne.operación
 		}
 	}
 
