@@ -112,8 +112,8 @@ func (g *Gecko) GeckoHTTPErrorHandler(err error, c *Context) {
 	}
 
 	ctx := c.Request().Method + " " + c.Request().URL.String()
-	if c.Sesion.Correo != "" {
-		ctx += " " + c.Sesion.Correo
+	if c.SesionID != "" {
+		ctx += " " + c.SesionID
 	}
 
 	if statusCode == 0 {

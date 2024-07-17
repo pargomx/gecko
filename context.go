@@ -13,7 +13,7 @@ type Context struct {
 	path     string
 	query    url.Values
 	gecko    *Gecko
-	Sesion   Sesion // Sesión del usuario autenticado o anónimo.
+	SesionID string
 }
 
 func (c *Context) Request() *http.Request {

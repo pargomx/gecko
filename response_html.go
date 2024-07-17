@@ -38,7 +38,7 @@ func (c *Context) RenderOk(name string, data map[string]any) error {
 	if data == nil {
 		data = map[string]any{}
 	}
-	data["Sesion"] = c.Sesion
+	data["Sesion"] = c.SesionID // TODO: Encontrar alternativa
 
 	if c.EsHTMX() { // Enviar solo parcial a HTMX
 
@@ -79,7 +79,7 @@ func (c *Context) RenderContenido(name string, data map[string]any) error {
 	if data == nil {
 		data = map[string]any{}
 	}
-	data["Sesion"] = c.Sesion
+	data["Sesion"] = c.SesionID // TODO: Encontrar alternativ
 
 	if c.EsHTMX() { // Enviar solo parcial a HTMX
 
@@ -120,7 +120,8 @@ func (c *Context) RenderCard(name string, data map[string]any) error {
 	if data == nil {
 		data = map[string]any{}
 	}
-	data["Sesion"] = c.Sesion
+	data["Sesion"] = c.SesionID // TODO: Encontrar alternativa
+
 	c.response.Header().Add("Cache-Control", "no-store") // ningún caché
 
 	if c.EsHTMX() { //* Enviar solo parcial a HTMX
