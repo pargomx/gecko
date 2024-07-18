@@ -8,27 +8,27 @@ type Error struct {
 	tipo      int    // Define el tipo de error.
 	mensaje   string // Mensaje amigable para el usuario.
 	operación string // Funciones que se estaban ejecutando.
-	contexto  string // Claves=Valor que dan contexto a la operación.
-	err       string // Error técnico que no verá el usuario.
+	valores   string // Claves=Valor que dan contexto a la operación.
+	texto     string // Error técnico que no verá el usuario.
 }
 
 const (
-	codeErrInesperado   = iota // Error desconocido, normalmente de una dependencia externa.
-	codeErrNoEncntrado         // No se encuentra un registro por su ID.
-	codeErrYaExiste            // Ya existe un recurson con el mismo ID.
-	codeErrHayHuerfanos        // No se puede borrar porque tiene hijos.
-	codeErrTooManyReq          // Se esperaba un solo registro y se encontraron muchos.
-	codeErrTooBig              // Un archivo es demasiado pesado.
-	codeErrTooLong             // Un string es demasiado largo.
-	codeErrDatoIndef           // Un dato es obligatorio y no se recibió.
-	codeErrDatoInvalido        // Un dato no cumple con las reglas de validación.
-	codeErrNoSoportado         // Un formato de archivo o dato no es soportado por el sistema.
-	codeErrNoAutorizado        // Un usuario no tiene permisos para realizar una acción.
-	codeErrTimeout             // Una operación tarda más de lo esperado.
-	codeErrNoDisponible        // Un servicio no está disponible.
-	codeErrNoSpaceLeft         // Se alcanzó la capacidad máxima.
-	codeErrAlEscribir          // Error al escribir en un archivo.
-	codeErrAlLeer              // Error al leer un archivo.
+	tipoErrInesperado   = iota // Error desconocido, normalmente de una dependencia externa.
+	tipoErrNoEncontrado        // No se encuentra un registro por su ID.
+	tipoErrYaExiste            // Ya existe un recurson con el mismo ID.
+	tipoErrHayHuerfanos        // No se puede borrar porque tiene hijos.
+	tipoErrTooManyReq          // Se esperaba un solo registro y se encontraron muchos.
+	tipoErrTooBig              // Un archivo es demasiado pesado.
+	tipoErrTooLong             // Un string es demasiado largo.
+	tipoErrDatoIndef           // Un dato es obligatorio y no se recibió.
+	tipoErrDatoInvalido        // Un dato no cumple con las reglas de validación.
+	tipoErrNoSoportado         // Un formato de archivo o dato no es soportado por el sistema.
+	tipoErrNoAutorizado        // Un usuario no tiene permisos para realizar una acción.
+	tipoErrTimeout             // Una operación tarda más de lo esperado.
+	tipoErrNoDisponible        // Un servicio no está disponible.
+	tipoErrNoSpaceLeft         // Se alcanzó la capacidad máxima.
+	tipoErrAlEscribir          // Error al escribir en un archivo.
+	tipoErrAlLeer              // Error al leer un archivo.
 )
 
 // ========================================================== //
@@ -37,22 +37,22 @@ const (
 // Definir la operación para tener el contexto en caso de error.
 func Op(op string) *Error { return &Error{operación: op} }
 
-func ErrInesperado() *Error   { return &Error{tipo: codeErrInesperado} }
-func ErrNoEncntrado() *Error  { return &Error{tipo: codeErrNoEncntrado} }
-func ErrYaExiste() *Error     { return &Error{tipo: codeErrYaExiste} }
-func ErrHayHuerfanos() *Error { return &Error{tipo: codeErrHayHuerfanos} }
-func ErrTooManyReq() *Error   { return &Error{tipo: codeErrTooManyReq} }
-func ErrTooBig() *Error       { return &Error{tipo: codeErrTooBig} }
-func ErrTooLong() *Error      { return &Error{tipo: codeErrTooLong} }
-func ErrDatoIndef() *Error    { return &Error{tipo: codeErrDatoIndef} }
-func ErrDatoInvalido() *Error { return &Error{tipo: codeErrDatoInvalido} }
-func ErrNoSoportado() *Error  { return &Error{tipo: codeErrNoSoportado} }
-func ErrNoAutorizado() *Error { return &Error{tipo: codeErrNoAutorizado} }
-func ErrTimeout() *Error      { return &Error{tipo: codeErrTimeout} }
-func ErrNoDisponible() *Error { return &Error{tipo: codeErrNoDisponible} }
-func ErrNoSpaceLeft() *Error  { return &Error{tipo: codeErrNoSpaceLeft} }
-func ErrAlEscribir() *Error   { return &Error{tipo: codeErrAlEscribir} }
-func ErrAlLeer() *Error       { return &Error{tipo: codeErrAlLeer} }
+func ErrInesperado() *Error   { return &Error{tipo: tipoErrInesperado} }
+func ErrNoEncntrado() *Error  { return &Error{tipo: tipoErrNoEncontrado} }
+func ErrYaExiste() *Error     { return &Error{tipo: tipoErrYaExiste} }
+func ErrHayHuerfanos() *Error { return &Error{tipo: tipoErrHayHuerfanos} }
+func ErrTooManyReq() *Error   { return &Error{tipo: tipoErrTooManyReq} }
+func ErrTooBig() *Error       { return &Error{tipo: tipoErrTooBig} }
+func ErrTooLong() *Error      { return &Error{tipo: tipoErrTooLong} }
+func ErrDatoIndef() *Error    { return &Error{tipo: tipoErrDatoIndef} }
+func ErrDatoInvalido() *Error { return &Error{tipo: tipoErrDatoInvalido} }
+func ErrNoSoportado() *Error  { return &Error{tipo: tipoErrNoSoportado} }
+func ErrNoAutorizado() *Error { return &Error{tipo: tipoErrNoAutorizado} }
+func ErrTimeout() *Error      { return &Error{tipo: tipoErrTimeout} }
+func ErrNoDisponible() *Error { return &Error{tipo: tipoErrNoDisponible} }
+func ErrNoSpaceLeft() *Error  { return &Error{tipo: tipoErrNoSpaceLeft} }
+func ErrAlEscribir() *Error   { return &Error{tipo: tipoErrAlEscribir} }
+func ErrAlLeer() *Error       { return &Error{tipo: tipoErrAlLeer} }
 
 // Convierte cualquier error en el tipo de gecko
 // para poder usar sus métodos. NUNCA retorna nil.
@@ -67,16 +67,16 @@ func Err(err error) *Error {
 	}
 	// Si es un error normal, wrappearlo.
 	return &Error{
-		err: err.Error(),
+		texto: err.Error(),
 	}
 }
 
 // ========================================================== //
 // ========== S E T T E R S ================================= //
 
-// Define un nuevo status code para el error.
+// Define un nuevo status setTipo para el error.
 // Subsecuentes llamadas sustituyen el código anterior.
-func (e *Error) code(code int) *Error {
+func (e *Error) setTipo(code int) *Error {
 	if code > 0 {
 		e.tipo = code
 	}
@@ -85,15 +85,15 @@ func (e *Error) code(code int) *Error {
 
 // Definir un error dirigido al desarrollador.
 // Subsecuentes llamadas se concatenan con ":".
-func (e *Error) Str(err string) *Error {
-	if err == "" {
+func (e *Error) Str(txt string) *Error {
+	if txt == "" {
 		LogWarn("err.Str() con mensaje vacío")
 		return e
 	}
-	if e.err == "" {
-		e.err = err
+	if e.texto == "" {
+		e.texto = txt
 	} else {
-		e.err = err + ": " + e.err
+		e.texto = txt + ": " + e.texto
 	}
 	return e
 }
@@ -138,10 +138,10 @@ func (e *Error) Op(op string) *Error {
 // Agregar contexto en forma de "clave=valor".
 // Subsecuentes llamadas se concatenan con " ".
 func (e *Error) Ctx(key string, val any) *Error {
-	if e.contexto == "" {
-		e.contexto = fmt.Sprintf("%s=%v", key, val)
+	if e.valores == "" {
+		e.valores = fmt.Sprintf("%s=%v", key, val)
 	} else {
-		e.contexto += fmt.Sprintf(" %s=%v", key, val)
+		e.valores += fmt.Sprintf(" %s=%v", key, val)
 	}
 	return e
 }
@@ -163,7 +163,10 @@ func (e *Error) Err(err error) *Error {
 
 	// si también es de gecko hay que combinarlos
 	if errGk.tipo > 0 {
-		e.code(errGk.tipo)
+		e.setTipo(errGk.tipo)
+	}
+	if errGk.texto != "" {
+		e.Str(errGk.texto)
 	}
 	if errGk.mensaje != "" {
 		e.Msg(errGk.mensaje)
@@ -171,16 +174,12 @@ func (e *Error) Err(err error) *Error {
 	if errGk.operación != "" {
 		e.Op(errGk.operación)
 	}
-	if errGk.contexto != "" {
-		if e.contexto == "" {
-			e.contexto = errGk.contexto
+	if errGk.valores != "" {
+		if e.valores == "" {
+			e.valores = errGk.valores
 		} else {
-			e.contexto += " " + errGk.contexto
+			e.valores += " " + errGk.valores
 		}
 	}
-	if errGk.err != "" {
-		e.Str(errGk.err)
-	}
-
 	return e
 }

@@ -109,32 +109,77 @@ func (e *Error) Error() string {
 	if e.mensaje != "" {
 		msg += ": " + e.mensaje + "."
 	}
-	if e.contexto != "" {
-		msg += " {" + e.contexto + "}"
+	if e.valores != "" {
+		msg += " {" + e.valores + "}"
 	}
-	if e.err != "" {
-		msg += " " + e.err
+	if e.texto != "" {
+		msg += " " + e.texto
 	}
 	return msg
 }
 
+// Imprime el error como estructura con toda su información.
+func (e *Error) Print() {
+	fmt.Printf("gko.Error{"+
+		"\n\ttipo: "+cPurple+"%d"+reset+
+		"\n\tmsg: "+cPurple+"%s"+reset+
+		"\n\tops: "+cPurple+"%s"+reset+
+		"\n\tctx: "+cPurple+"%s"+reset+
+		"\n\ttxt: "+cPurple+"%v"+reset+
+		"\n}\n",
+		e.tipo, e.mensaje, e.operación, e.valores, e.texto,
+	)
+}
+
 // Devuelve un mensaje para presentar al usuario.
-func (e *Error) Mensaje() string {
+func (e *Error) GetMensaje() string {
 	if e.mensaje != "" {
 		return e.mensaje + "."
-	} else if e.err != "" {
-		return e.err
+	} else if e.texto != "" {
+		return e.texto
 	} else if e.tipo > 0 {
 		return fmt.Sprintf("Error %d", e.tipo)
 	}
 	return "Hubo un error, por favor contacta a soporte."
 }
 
-func (e *Error) CodigoHTTP() int {
-	if e.tipo > 100 {
-		return e.tipo
+func (e *Error) GetCodigoHTTP() int {
+	switch e.tipo {
+	case tipoErrInesperado:
+		return 500
+	case tipoErrNoEncontrado:
+		return 404
+	case tipoErrYaExiste:
+		return 409
+	case tipoErrHayHuerfanos:
+		return 409
+	case tipoErrTooManyReq:
+		return 429
+	case tipoErrTooBig:
+		return 400
+	case tipoErrTooLong:
+		return 400
+	case tipoErrDatoIndef:
+		return 400
+	case tipoErrDatoInvalido:
+		return 400
+	case tipoErrNoSoportado:
+		return 415
+	case tipoErrNoAutorizado:
+		return 403
+	case tipoErrTimeout:
+		return 408
+	case tipoErrNoDisponible:
+		return 503
+	case tipoErrNoSpaceLeft:
+		return 507
+	case tipoErrAlEscribir:
+		return 503
+	case tipoErrAlLeer:
+		return 503
+	default:
+		return 500
 	}
-	return 500
 }
 
 // Imprime el error en la consola.
@@ -167,27 +212,14 @@ func (e *Error) Log() {
 	}
 
 	// [ERROR] (404) DoSomething > GetRecord: Usuario no encontrado. {id=123}
-	if e.contexto != "" {
-		msg += " " + rPurple + e.contexto
+	if e.valores != "" {
+		msg += " " + rPurple + e.valores
 	}
 
 	// [ERROR] (404) DoSomething > GetRecord: Usuario no encontrado. {id=123} sql: no rows
-	if e.err != "" {
-		msg += " " + rRed + e.err
+	if e.texto != "" {
+		msg += " " + rRed + e.texto
 	}
 
 	println(msg + reset)
-}
-
-// Imprime el error como estructura con toda su información.
-func (e *Error) Print() {
-	fmt.Printf("gko.Error{"+
-		"\n\tcod: "+cPurple+"%d"+reset+
-		"\n\tmsg: "+cPurple+"%s"+reset+
-		"\n\tops: "+cPurple+"%s"+reset+
-		"\n\tctx: "+cPurple+"%s"+reset+
-		"\n\terr: "+cPurple+"%v"+reset+
-		"\n}\n",
-		e.tipo, e.mensaje, e.operación, e.contexto, e.err,
-	)
 }

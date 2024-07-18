@@ -21,7 +21,7 @@ func errorHandler(err error, c *Context) {
 
 	// Si es un error http de gecko (preferido)
 	if hee, ok := err.(*gko.Error); ok {
-		statusCode = hee.CodigoHTTP()
+		statusCode = hee.GetCodigoHTTP()
 		mensaje = hee.Error()
 		logMsg += hee.Error()
 
@@ -99,8 +99,8 @@ func (g *Gecko) GeckoHTTPErrorHandler(err error, c *Context) {
 			fmt.Println("err nil response_error")
 			return
 		}
-		statusCode = errGecko.CodigoHTTP()
-		msgUsuario = errGecko.Mensaje()
+		statusCode = errGecko.GetCodigoHTTP()
+		msgUsuario = errGecko.GetMensaje()
 		msgLog += errGecko.Error()
 
 	} else {
