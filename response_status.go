@@ -3,6 +3,8 @@ package gecko
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/pargomx/gecko/gko"
 )
 
 // ================================================================ //
@@ -27,7 +29,10 @@ func (c *Context) StatusOkf(format string, a ...any) (err error) {
 
 // Retorna un estatus 202 aceptado con el mensaje dado.
 func (c *Context) StatusAccepted(msg string) error {
-	return &Gkerror{codigo: http.StatusAccepted, mensaje: msg}
+	c.Response().Header().Set("Content-Type", "text/plain; charset=utf-8")
+	c.Response().WriteHeader(202)
+	_, err := c.Response().Writer.Write([]byte(msg))
+	return err
 }
 
 // ================================================================ //
@@ -36,7 +41,7 @@ func (c *Context) StatusAccepted(msg string) error {
 // Redirect the request to a provided URL with status code.
 func (c *Context) Redirect(code int, url string) error {
 	if code < 300 || code > 308 {
-		return ErrInvalidRedirectCode
+		return gko.ErrInesperado().Str("redirect inválido").Ctx("code", code)
 	}
 	c.response.Header().Set(HeaderLocation, url)
 	c.response.WriteHeader(code)
@@ -51,98 +56,81 @@ func (c *Context) Redir(format string, a ...any) error {
 }
 
 // ================================================================ //
-// ========== Errores del cliente (4xx) =========================== //
-
-// Retorna un error 400 Bad Request.
-func (c *Context) ErrBadRequest(err error) *Gkerror {
-	return &Gkerror{codigo: http.StatusBadRequest, err: err}
-}
-
-// Retorna un error 404 Not Found.
-func (c *Context) ErrNotFound(err error) *Gkerror {
-	return &Gkerror{codigo: http.StatusNotFound, err: err}
-}
-
 // ================================================================ //
 
 // Retorna un error 400 Bad Request.
-func (c *Context) StatusBadRequest(msg string) *Gkerror {
+func (c *Context) StatusBadRequest(msg string) error {
 	if msg == "" {
 		msg = "Solicitud no aceptada"
 	}
-	return &Gkerror{codigo: http.StatusBadRequest, mensaje: msg}
+	return c.String(http.StatusBadRequest, msg)
 }
 
 // Retorna un error 401 Unauthorized, para usuario no autenticado.
-func (c *Context) StatusUnauthorized(msg string) *Gkerror {
+func (c *Context) StatusUnauthorized(msg string) error {
 	if msg == "" {
 		msg = "No autorizado"
 	}
-	return &Gkerror{codigo: http.StatusUnauthorized, mensaje: msg}
+	return c.String(http.StatusUnauthorized, msg)
 }
 
 // Retorna un error 402 Payment Required.
-func (c *Context) StatusPaymentRequired(msg string) *Gkerror {
+func (c *Context) StatusPaymentRequired(msg string) error {
 	if msg == "" {
 		msg = "Pago requerido"
 	}
-	return &Gkerror{codigo: http.StatusPaymentRequired, mensaje: msg}
+	return c.String(http.StatusPaymentRequired, msg)
 }
 
 // Retorna un error 403 Forbidden, para privilegios insuficientes.
-func (c *Context) StatusForbidden(msg string) *Gkerror {
+func (c *Context) StatusForbidden(msg string) error {
 	if msg == "" {
 		msg = "No permitido"
 	}
-	return &Gkerror{codigo: http.StatusForbidden, mensaje: msg}
+	return c.String(http.StatusForbidden, msg)
 }
 
 // Retorna un error 404 Not Found.
-func (c *Context) StatusNotFound(msg string) *Gkerror {
+func (c *Context) StatusNotFound(msg string) error {
 	if msg == "" {
 		msg = "Recurso no encontrado"
 	}
-	return &Gkerror{codigo: http.StatusNotFound, mensaje: msg}
+	return c.String(http.StatusNotFound, msg)
 }
 
 // Retorna un error 409 Conflict, para already exists u otros conflictos.
-func (c *Context) StatusConflict(msg string) *Gkerror {
+func (c *Context) StatusConflict(msg string) error {
 	if msg == "" {
 		msg = "Conflicto con recurso existente"
 	}
-	return &Gkerror{codigo: http.StatusConflict, mensaje: msg}
+	return c.String(http.StatusConflict, msg)
 }
 
 // Retorna un error 415 Unsupported Media Type.
-func (c *Context) StatusUnsupportedMedia(msg string) *Gkerror {
+func (c *Context) StatusUnsupportedMedia(msg string) error {
 	if msg == "" {
 		msg = "Tipo de media no soportado"
 	}
-	return &Gkerror{codigo: http.StatusUnsupportedMediaType, mensaje: msg}
+	return c.String(http.StatusUnsupportedMediaType, msg)
 }
 
 // Retorna un error 429.
-func (c *Context) StatusTooManyRequests(msg string) *Gkerror {
+func (c *Context) StatusTooManyRequests(msg string) error {
 	if msg == "" {
 		msg = "Demasiadas solicitudes"
 	}
-	return &Gkerror{codigo: http.StatusTooManyRequests, mensaje: msg}
+	return c.String(http.StatusTooManyRequests, msg)
 }
-
-// ================================================================ //
-// ========== Errores del servidor (5xx) =========================== //
-
-// Retorna un error 500.
-func (c *Context) ServerError(err error) *Gkerror {
-	return &Gkerror{codigo: http.StatusInternalServerError, err: err}
-}
-
-// ================================================================ //
 
 // Retorna un error 500 Internal Server Error.
-func (c *Context) StatusServerError(msg string) *Gkerror {
+func (c *Context) StatusServerError(msg string) error {
 	if msg == "" {
 		msg = "Error en servidor"
 	}
-	return &Gkerror{codigo: http.StatusInternalServerError, mensaje: msg}
+	return c.String(http.StatusInternalServerError, msg)
+}
+
+// Retorna un error 500.
+func (c *Context) ServerError(err error) error {
+	return c.String(http.StatusInternalServerError, err.Error())
 }

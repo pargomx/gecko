@@ -2,16 +2,17 @@ package gecko
 
 import (
 	"encoding/json"
-	"net/http"
+
+	"github.com/pargomx/gecko/gko"
 )
 
 // Recibe un JSON del request y pone los datos en v con json.Unmarshal
 func (c *Context) JSONUnmarshal(v any) error {
 	err := json.NewDecoder(c.Request().Body).Decode(v)
 	if ute, ok := err.(*json.UnmarshalTypeError); ok {
-		return NewErr(http.StatusBadRequest).Err(err).Msgf("Unmarshal type error: expected=%v, got=%v, field=%v, offset=%v", ute.Type, ute.Value, ute.Field, ute.Offset)
+		return gko.Err(err).Msgf("Unmarshal type error: expected=%v, got=%v, field=%v, offset=%v", ute.Type, ute.Value, ute.Field, ute.Offset)
 	} else if se, ok := err.(*json.SyntaxError); ok {
-		return NewErr(http.StatusBadRequest).Err(err).Msgf("Syntax error: offset=%v, error=%v", se.Offset, se.Error())
+		return gko.Err(err).Msgf("Syntax error: offset=%v, error=%v", se.Offset, se.Error())
 	}
 	return err
 }

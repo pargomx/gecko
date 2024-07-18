@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/pargomx/gecko"
+	"github.com/pargomx/gecko/gko"
 )
 
 func main() {
@@ -30,13 +31,13 @@ func main() {
 	if socket != "" {
 		err := g.IniciarEnSocket(socket)
 		if err != nil {
-			gecko.LogError(err)
+			gko.LogError(err)
 		}
 
 	} else if puerto > 0 {
 		err := g.IniciarEnPuerto(puerto)
 		if err != nil {
-			gecko.LogError(err)
+			gko.LogError(err)
 		}
 
 	} else {

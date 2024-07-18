@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/pargomx/gecko/gko"
 )
 
 // Gecko es un servidor web simple basado en la librería estándar de Go 1.22.
@@ -53,7 +55,7 @@ func (g *Gecko) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func New() *Gecko {
 	pwd, err := os.Getwd()
 	if err != nil {
-		FatalErr(err)
+		gko.FatalError(err)
 	}
 	return &Gecko{
 		mux: http.NewServeMux(),
@@ -71,20 +73,20 @@ func New() *Gecko {
 // Inicia el servidor HTTP.
 func (g *Gecko) IniciarEnPuerto(port int) error {
 	if port < 1 || port > 65535 {
-		return ErrNotAcceptable.Msg("puerto TCP inválido")
+		return gko.ErrDatoInvalido().Msg("puerto TCP inválido")
 	}
 	srv := http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
 		Handler: g,
 	}
-	LogEventof("Escuchando en tcp/%d", port)
+	gko.LogEventof("Escuchando en tcp/%d", port)
 	return srv.ListenAndServe()
 }
 
 // Create a Unix domain sock and listen for incoming connections.
 func (g *Gecko) IniciarEnSocket(socket string) error {
 	if socket == "" {
-		return ErrNotAcceptable.Msg("socket path indefinido")
+		return gko.ErrDatoIndef().Msg("socket path indefinido")
 	}
 	sock, err := net.Listen("unix", socket)
 	if err != nil {
@@ -97,12 +99,12 @@ func (g *Gecko) IniciarEnSocket(socket string) error {
 		<-exitChan
 		err = os.Remove(socket)
 		if err != nil {
-			LogError(err)
+			gko.LogError(err)
 		} else {
-			LogInfof("socket removido %v", socket)
+			gko.LogInfof("socket removido %v", socket)
 		}
 		os.Exit(0)
 	}()
-	LogEventof("Escuchando en unix %v", socket)
+	gko.LogEventof("Escuchando en unix %v", socket)
 	return http.Serve(sock, g)
 }

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/pargomx/gecko/gko"
 )
 
 // Responder con el HTTPErrorHandler definido para gecko.
@@ -15,11 +17,11 @@ func errorHandler(err error, c *Context) {
 	statusCode := http.StatusInternalServerError // Default 500
 	mensaje := ""
 	logMsg := c.Request().URL.Path + " "
-	op := NewOp(c.Request().URL.Path)
+	op := gko.Op(c.Request().URL.Path)
 
 	// Si es un error http de gecko (preferido)
-	if hee, ok := err.(*Gkerror); ok {
-		statusCode = hee.GetCode()
+	if hee, ok := err.(*gko.Error); ok {
+		statusCode = hee.CodigoHTTP()
 		mensaje = hee.Error()
 		logMsg += hee.Error()
 
@@ -33,7 +35,7 @@ func errorHandler(err error, c *Context) {
 		statusCode = http.StatusInternalServerError
 	}
 	if statusCode >= 400 {
-		LogError(op.Err(err))
+		gko.LogError(op.Err(err))
 	}
 
 	// Preparar respuesta
@@ -91,14 +93,14 @@ func (g *Gecko) GeckoHTTPErrorHandler(err error, c *Context) {
 	msgUsuario := ""
 	msgLog := ""
 
-	if errGecko, ok := err.(*Gkerror); ok {
+	if errGecko, ok := err.(*gko.Error); ok {
 		// Si es un error gecko (preferido)
 		if errGecko == nil {
 			fmt.Println("err nil response_error")
 			return
 		}
-		statusCode = errGecko.codigo
-		msgUsuario = errGecko.mensaje
+		statusCode = errGecko.CodigoHTTP()
+		msgUsuario = errGecko.Mensaje()
 		msgLog += errGecko.Error()
 
 	} else {

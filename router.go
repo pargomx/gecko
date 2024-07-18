@@ -3,6 +3,8 @@ package gecko
 import (
 	"net/http"
 	"strings"
+
+	"github.com/pargomx/gecko/gko"
 )
 
 // Tratar rutas con trailing slash como si no lo tuvieran.
@@ -56,18 +58,18 @@ func (g *Gecko) registrarRuta(método string, ruta string, handler HandlerFunc) 
 func toMuxPattern(método string, ruta string) string {
 	// Validar la ruta.
 	if strings.Contains(ruta, " ") {
-		FatalFmt("La ruta no puede contener espacios en blanco: '%s'", ruta)
+		gko.FatalExitf("La ruta no puede contener espacios en blanco: '%s'", ruta)
 	}
 	ruta = strings.TrimSuffix(ruta, "/")
 	if ruta == "" {
 		ruta = "/{$}"
 	}
 	if ruta[0] != '/' {
-		FatalFmt("La ruta debe comenzar con slash: '%s'", ruta)
+		gko.FatalExitf("La ruta debe comenzar con slash: '%s'", ruta)
 	}
 	// Validar método.
 	if método == "" {
-		FatalFmt("El método no puede estar indefinido: '%s'", ruta)
+		gko.FatalExitf("El método no puede estar indefinido: '%s'", ruta)
 	}
 	return método + " " + ruta
 }

@@ -10,6 +10,8 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/pargomx/gecko/gko"
 )
 
 // Envía un archivo como respuesta o el index.html si es un directorio.
@@ -22,9 +24,9 @@ func fsFile(c *Context, fpath string, filesystem fs.FS) error {
 	fi, err := fs.Stat(filesystem, fpath)
 	if err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {
-			c.LogError("fsFile.Stat('"+fpath+"'): ", err)
+			gko.Err(err).Op("fsFile.Stat('" + fpath + "')").Log()
 		}
-		return ErrNotFound
+		return gko.ErrNoEncntrado()
 	}
 	// Si es un directorio se sirve el index.html
 	if fi.IsDir() {
@@ -33,8 +35,8 @@ func fsFile(c *Context, fpath string, filesystem fs.FS) error {
 	// Abrir el archivo.
 	file, err := filesystem.Open(fpath)
 	if err != nil {
-		c.LogError("fsFile.Open('"+fpath+"'): ", err)
-		return ErrNotFound
+		gko.Err(err).Op("fsFile.Open('" + fpath + "')").Log()
+		return gko.ErrNoEncntrado()
 	}
 	defer file.Close()
 	// Enviar el archivo.
@@ -55,8 +57,8 @@ func fsDirIndex(c *Context, fpath string, fi fs.FileInfo, filesystem fs.FS) erro
 	// Abrir el archivo.
 	file, err := filesystem.Open(fpath)
 	if err != nil {
-		c.LogError("fsFile.Open('"+fpath+"'): ", err)
-		return ErrNotFound
+		gko.Err(err).Op("fsFile.Open('" + fpath + "')").Log()
+		return gko.ErrNoEncntrado()
 	}
 	defer file.Close()
 	// Enviar el archivo.
@@ -154,7 +156,7 @@ func mustSubFS(currentFs fs.FS, fsRoot string) fs.FS {
 	fsRoot = filepath.ToSlash(filepath.Clean(fsRoot))
 	subFs, err := fs.Sub(currentFs, fsRoot)
 	if err != nil {
-		FatalFmt("imposible crear subFS: invalid root: %v", err)
+		gko.FatalExitf("imposible crear subFS: invalid root: %v", err)
 	}
 	return subFs
 }
