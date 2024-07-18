@@ -100,8 +100,8 @@ func FatalError(err error) {
 // No está pensado para el usuario porque da mucha información.
 func (e *Error) Error() string {
 	msg := ""
-	if e.codigo > 0 {
-		msg += fmt.Sprintf("[%d]", e.codigo)
+	if e.tipo > 0 {
+		msg += fmt.Sprintf("[%d]", e.tipo)
 	}
 	if e.operación != "" {
 		msg += " " + e.operación
@@ -112,8 +112,8 @@ func (e *Error) Error() string {
 	if e.contexto != "" {
 		msg += " {" + e.contexto + "}"
 	}
-	if e.err != nil {
-		msg += " " + e.err.Error()
+	if e.err != "" {
+		msg += " " + e.err
 	}
 	return msg
 }
@@ -122,17 +122,17 @@ func (e *Error) Error() string {
 func (e *Error) Mensaje() string {
 	if e.mensaje != "" {
 		return e.mensaje + "."
-	} else if e.err != nil {
-		return e.err.Error()
-	} else if e.codigo > 0 {
-		return fmt.Sprintf("Error %d", e.codigo)
+	} else if e.err != "" {
+		return e.err
+	} else if e.tipo > 0 {
+		return fmt.Sprintf("Error %d", e.tipo)
 	}
 	return "Hubo un error, por favor contacta a soporte."
 }
 
 func (e *Error) CodigoHTTP() int {
-	if e.codigo > 100 {
-		return e.codigo
+	if e.tipo > 100 {
+		return e.tipo
 	}
 	return 500
 }
@@ -150,10 +150,10 @@ func (e *Error) Log() {
 	msg := timestamp()
 
 	// 2020-11-25 18:54:32 [ERROR] (404)
-	if e.codigo == 0 {
+	if e.tipo == 0 {
 		msg += bRed + "[ERROR]" + reset
 	} else {
-		msg += bRed + fmt.Sprintf("[ERROR] (%d)", e.codigo) + reset
+		msg += bRed + fmt.Sprintf("[ERROR] (%d)", e.tipo) + reset
 	}
 
 	// 2020-11-25 18:54:32 [ERROR] (404) DoSomething > GetRecord
@@ -172,8 +172,8 @@ func (e *Error) Log() {
 	}
 
 	// [ERROR] (404) DoSomething > GetRecord: Usuario no encontrado. {id=123} sql: no rows
-	if e.err != nil {
-		msg += " " + rRed + e.err.Error()
+	if e.err != "" {
+		msg += " " + rRed + e.err
 	}
 
 	println(msg + reset)
@@ -188,6 +188,6 @@ func (e *Error) Print() {
 		"\n\tctx: "+cPurple+"%s"+reset+
 		"\n\terr: "+cPurple+"%v"+reset+
 		"\n}\n",
-		e.codigo, e.mensaje, e.operación, e.contexto, e.err,
+		e.tipo, e.mensaje, e.operación, e.contexto, e.err,
 	)
 }

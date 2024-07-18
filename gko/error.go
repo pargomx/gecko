@@ -5,11 +5,11 @@ import (
 )
 
 type Error struct {
-	codigo    int    // Define el tipo de error
-	mensaje   string // Mensaje amigable para el usuario
-	operación string // Funciones que se estaban ejecutando
-	contexto  string // Claves=Valor que dan contexto a la operación
-	err       error  // Error de bajo nivel que no verá el usuario
+	tipo      int    // Define el tipo de error.
+	mensaje   string // Mensaje amigable para el usuario.
+	operación string // Funciones que se estaban ejecutando.
+	contexto  string // Claves=Valor que dan contexto a la operación.
+	err       string // Error técnico que no verá el usuario.
 }
 
 const (
@@ -37,22 +37,22 @@ const (
 // Definir la operación para tener el contexto en caso de error.
 func Op(op string) *Error { return &Error{operación: op} }
 
-func ErrInesperado() *Error   { return &Error{codigo: codeErrInesperado} }
-func ErrNoEncntrado() *Error  { return &Error{codigo: codeErrNoEncntrado} }
-func ErrYaExiste() *Error     { return &Error{codigo: codeErrYaExiste} }
-func ErrHayHuerfanos() *Error { return &Error{codigo: codeErrHayHuerfanos} }
-func ErrTooManyReq() *Error   { return &Error{codigo: codeErrTooManyReq} }
-func ErrTooBig() *Error       { return &Error{codigo: codeErrTooBig} }
-func ErrTooLong() *Error      { return &Error{codigo: codeErrTooLong} }
-func ErrDatoIndef() *Error    { return &Error{codigo: codeErrDatoIndef} }
-func ErrDatoInvalido() *Error { return &Error{codigo: codeErrDatoInvalido} }
-func ErrNoSoportado() *Error  { return &Error{codigo: codeErrNoSoportado} }
-func ErrNoAutorizado() *Error { return &Error{codigo: codeErrNoAutorizado} }
-func ErrTimeout() *Error      { return &Error{codigo: codeErrTimeout} }
-func ErrNoDisponible() *Error { return &Error{codigo: codeErrNoDisponible} }
-func ErrNoSpaceLeft() *Error  { return &Error{codigo: codeErrNoSpaceLeft} }
-func ErrAlEscribir() *Error   { return &Error{codigo: codeErrAlEscribir} }
-func ErrAlLeer() *Error       { return &Error{codigo: codeErrAlLeer} }
+func ErrInesperado() *Error   { return &Error{tipo: codeErrInesperado} }
+func ErrNoEncntrado() *Error  { return &Error{tipo: codeErrNoEncntrado} }
+func ErrYaExiste() *Error     { return &Error{tipo: codeErrYaExiste} }
+func ErrHayHuerfanos() *Error { return &Error{tipo: codeErrHayHuerfanos} }
+func ErrTooManyReq() *Error   { return &Error{tipo: codeErrTooManyReq} }
+func ErrTooBig() *Error       { return &Error{tipo: codeErrTooBig} }
+func ErrTooLong() *Error      { return &Error{tipo: codeErrTooLong} }
+func ErrDatoIndef() *Error    { return &Error{tipo: codeErrDatoIndef} }
+func ErrDatoInvalido() *Error { return &Error{tipo: codeErrDatoInvalido} }
+func ErrNoSoportado() *Error  { return &Error{tipo: codeErrNoSoportado} }
+func ErrNoAutorizado() *Error { return &Error{tipo: codeErrNoAutorizado} }
+func ErrTimeout() *Error      { return &Error{tipo: codeErrTimeout} }
+func ErrNoDisponible() *Error { return &Error{tipo: codeErrNoDisponible} }
+func ErrNoSpaceLeft() *Error  { return &Error{tipo: codeErrNoSpaceLeft} }
+func ErrAlEscribir() *Error   { return &Error{tipo: codeErrAlEscribir} }
+func ErrAlLeer() *Error       { return &Error{tipo: codeErrAlLeer} }
 
 // Convierte cualquier error en el tipo de gecko
 // para poder usar sus métodos. NUNCA retorna nil.
@@ -67,7 +67,7 @@ func Err(err error) *Error {
 	}
 	// Si es un error normal, wrappearlo.
 	return &Error{
-		err: err,
+		err: err.Error(),
 	}
 }
 
@@ -78,23 +78,23 @@ func Err(err error) *Error {
 // Subsecuentes llamadas sustituyen el código anterior.
 func (e *Error) code(code int) *Error {
 	if code > 0 {
-		e.codigo = code
+		e.tipo = code
 	}
 	return e
 }
 
-// Definir un mensaje dirigido al desarrollador.
+// Definir un error dirigido al desarrollador.
 // Subsecuentes llamadas se concatenan con ":".
-func (e *Error) Str(msg string) *Error {
-	if msg == "" {
+func (e *Error) Str(err string) *Error {
+	if err == "" {
 		LogWarn("err.Str() con mensaje vacío")
 		return e
 	}
-	// if e.mensaje == "" {
-	// 	e.mensaje = msg
-	// } else {
-	// 	e.mensaje = msg + ": " + e.mensaje
-	// }
+	if e.err == "" {
+		e.err = err
+	} else {
+		e.err = err + ": " + e.err
+	}
 	return e
 }
 
@@ -157,17 +157,13 @@ func (e *Error) Err(err error) *Error {
 	// si el error no es de gecko solo wrappearlo
 	errGk, ok := err.(*Error)
 	if !ok {
-		if e.err == nil {
-			e.err = err
-		} else {
-			e.err = fmt.Errorf("%w: %w", err, e.err)
-		}
+		e.Str(err.Error())
 		return e
 	}
 
-	// si también es gecko hay que combinarlos
-	if errGk.codigo > 0 {
-		e.code(errGk.codigo)
+	// si también es de gecko hay que combinarlos
+	if errGk.tipo > 0 {
+		e.code(errGk.tipo)
 	}
 	if errGk.mensaje != "" {
 		e.Msg(errGk.mensaje)
@@ -182,12 +178,8 @@ func (e *Error) Err(err error) *Error {
 			e.contexto += " " + errGk.contexto
 		}
 	}
-	if errGk.err != nil {
-		if e.err == nil {
-			e.err = errGk.err
-		} else {
-			e.err = fmt.Errorf("%w: %w", errGk.err, e.err)
-		}
+	if errGk.err != "" {
+		e.Str(errGk.err)
 	}
 
 	return e
