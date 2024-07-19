@@ -97,7 +97,7 @@ func (c *Context) Cookie(name string) (*http.Cookie, error) {
 }
 
 func (c *Context) SetCookie(cookie *http.Cookie) {
-	http.SetCookie(c.Response(), cookie)
+	http.SetCookie(c.response, cookie)
 }
 
 func (c *Context) Path() string {

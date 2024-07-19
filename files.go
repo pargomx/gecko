@@ -45,7 +45,7 @@ func fsFile(c *Context, fpath string, filesystem fs.FS) error {
 	if !ok {
 		return gko.ErrInesperado().Str("file does not implement io.ReadSeeker")
 	}
-	http.ServeContent(c.Response(), c.Request(), fi.Name(), fi.ModTime(), ff)
+	http.ServeContent(c.response, c.request, fi.Name(), fi.ModTime(), ff)
 	return nil
 }
 
@@ -69,7 +69,7 @@ func fsDirIndex(c *Context, fpath string, fi fs.FileInfo, filesystem fs.FS) erro
 	if !ok {
 		return gko.ErrInesperado().Str("file does not implement io.ReadSeeker")
 	}
-	http.ServeContent(c.Response(), c.Request(), fi.Name(), fi.ModTime(), ff)
+	http.ServeContent(c.response, c.request, fi.Name(), fi.ModTime(), ff)
 	return nil
 }
 

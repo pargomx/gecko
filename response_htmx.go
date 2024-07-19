@@ -8,8 +8,8 @@ import "fmt"
 // Si la solicitud viene de HTMX significa que tiene el header HX-Request = true.
 // Cuando es HX-History-Restore-Request se necesita enviar la página entera.
 func (c *Context) EsHTMX() bool {
-	return c.Request().Header.Get("HX-Request") == "true" &&
-		c.Request().Header.Get("HX-History-Restore-Request") != "true"
+	return c.request.Header.Get("HX-Request") == "true" &&
+		c.request.Header.Get("HX-History-Restore-Request") != "true"
 }
 
 // ================================================================ //
@@ -20,7 +20,7 @@ func (c *Context) EsHTMX() bool {
 //
 // Conveniente como respuesta a una solicitud PUT.
 func (c *Context) RefreshHTMX() error {
-	c.Response().Header().Set("HX-Refresh", "true")
+	c.response.Header().Set("HX-Refresh", "true")
 	return c.NoContent(204)
 }
 
@@ -30,11 +30,11 @@ func (c *Context) RefreshHTMX() error {
 //
 // Utiliza fmt.Sprintf para construir el path.
 func (c *Context) RedirectHTMX(path string, a ...any) error {
-	c.Response().Header().Set("HX-Redirect", fmt.Sprintf(path, a...))
+	c.response.Header().Set("HX-Redirect", fmt.Sprintf(path, a...))
 	return c.StatusOk("Redirigiendo a " + fmt.Sprintf(path, a...))
 }
 
 // Agrega un evento al HX-Trigger
 func (c *Context) TriggerEventoHTMX(evento string) {
-	c.Response().Header().Set("HX-Trigger", evento)
+	c.response.Header().Set("HX-Trigger", evento)
 }

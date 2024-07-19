@@ -8,7 +8,7 @@ import (
 
 // Recibe un JSON del request y pone los datos en v con json.Unmarshal
 func (c *Context) JSONUnmarshal(v any) error {
-	err := json.NewDecoder(c.Request().Body).Decode(v)
+	err := json.NewDecoder(c.request.Body).Decode(v)
 	if ute, ok := err.(*json.UnmarshalTypeError); ok {
 		return gko.Err(err).Msgf("Unmarshal type error: expected=%v, got=%v, field=%v, offset=%v", ute.Type, ute.Value, ute.Field, ute.Offset)
 	} else if se, ok := err.(*json.SyntaxError); ok {
@@ -23,7 +23,7 @@ func (c *Context) JSONUnmarshal(v any) error {
 // Serialize converts an interface into a json and writes it to the response.
 // You can optionally use the indent parameter to produce pretty JSONs.
 func jsonSerialize(c *Context, i interface{}, indent string) error {
-	enc := json.NewEncoder(c.Response())
+	enc := json.NewEncoder(c.response)
 	if indent != "" {
 		enc.SetIndent("", indent)
 	}

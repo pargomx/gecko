@@ -33,11 +33,11 @@ func (g *Gecko) ResponderHTTPHandlerError(err error, c *Context) {
 	}
 	gkerr.Log()
 
-	// gkerr.Op(c.Request().Method + " " + c.Request().URL.Path) // Ruta sin query.
-	// gkerr.Op(c.Request().Method + " " + c.Request().URL.String()) // Ruta con query.
+	// gkerr.Op(c.request.Method + " " + c.request.URL.Path) // Ruta sin query.
+	// gkerr.Op(c.request.Method + " " + c.request.URL.String()) // Ruta con query.
 
 	// Método HEAD debe responder sin body.
-	if c.Request().Method == http.MethodHead {
+	if c.request.Method == http.MethodHead {
 		err := c.NoContent(gkerr.GetCodigoHTTP())
 		if err != nil {
 			gko.LogAlert("gko.ErrHandler: head response: " + err.Error())

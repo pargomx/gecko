@@ -85,15 +85,15 @@ func (c *Context) FormFechaNullable(name string) (*time.Time, error) {
 
 // Múltiples valores sin sanitizar obtenidos del form.
 func (c *Context) MultiFormTalCual(key string) []string {
-	c.Request().ParseForm()
-	return c.Request().Form[key]
+	c.request.ParseForm()
+	return c.request.Form[key]
 }
 
 // Múltiples valores sanitizados obtenidos del form.
 func (c *Context) MultiFormVal(name string) []string {
 	res := []string{}
-	c.Request().ParseForm()
-	for _, v := range c.Request().Form[name] {
+	c.request.ParseForm()
+	for _, v := range c.request.Form[name] {
 		res = append(res, txtSanitizar(v))
 	}
 	return res
@@ -102,8 +102,8 @@ func (c *Context) MultiFormVal(name string) []string {
 // Múltiples valores sanitizados en mayúsculas obtenidos del form.
 func (c *Context) MultiFormUpper(name string) []string {
 	res := []string{}
-	c.Request().ParseForm()
-	for _, v := range c.Request().Form[name] {
+	c.request.ParseForm()
+	for _, v := range c.request.Form[name] {
 		res = append(res, txtUpper(v))
 	}
 	return res
@@ -112,8 +112,8 @@ func (c *Context) MultiFormUpper(name string) []string {
 // Múltiples valores sanitizados en minúsculas obtenidos del form.
 func (c *Context) MultiFormLower(name string) []string {
 	res := []string{}
-	c.Request().ParseForm()
-	for _, v := range c.Request().Form[name] {
+	c.request.ParseForm()
+	for _, v := range c.request.Form[name] {
 		res = append(res, txtLower(v))
 	}
 	return res
@@ -123,8 +123,8 @@ func (c *Context) MultiFormLower(name string) []string {
 // No se agregan los valores que tengan errores en la conversión.
 func (c *Context) MultiFormInt(name string) []int {
 	res := []int{}
-	c.Request().ParseForm()
-	for _, v := range c.Request().Form[name] {
+	c.request.ParseForm()
+	for _, v := range c.request.Form[name] {
 		n, err := txtInt(v)
 		if err != nil {
 			continue
@@ -138,8 +138,8 @@ func (c *Context) MultiFormInt(name string) []int {
 // Los valores deben ser números válidos todos.
 func (c *Context) MultiFormIntMust(name string) ([]int, error) {
 	res := []int{}
-	c.Request().ParseForm()
-	for _, v := range c.Request().Form[name] {
+	c.request.ParseForm()
+	for _, v := range c.request.Form[name] {
 		n, err := txtInt(v)
 		if err != nil {
 			return nil, errors.New("el valor [" + v + "] no es un número válido para [" + name + "]")
@@ -153,8 +153,8 @@ func (c *Context) MultiFormIntMust(name string) ([]int, error) {
 // No se agregan los valores que tengan errores en la conversión.
 func (c *Context) MultiFormUint(name string) []uint64 {
 	res := []uint64{}
-	c.Request().ParseForm()
-	for _, v := range c.Request().Form[name] {
+	c.request.ParseForm()
+	for _, v := range c.request.Form[name] {
 		n, err := txtUint64(v)
 		if err != nil {
 			continue
@@ -168,8 +168,8 @@ func (c *Context) MultiFormUint(name string) []uint64 {
 // Los valores deben ser números válidos todos.
 func (c *Context) MultiFormUintMust(name string) ([]uint64, error) {
 	res := []uint64{}
-	c.Request().ParseForm()
-	for _, v := range c.Request().Form[name] {
+	c.request.ParseForm()
+	for _, v := range c.request.Form[name] {
 		n, err := txtUint64(v)
 		if err != nil {
 			return nil, errors.New("el valor [" + v + "] no es un número válido para [" + name + "]")
