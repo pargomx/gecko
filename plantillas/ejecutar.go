@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/pargomx/gecko"
+	"github.com/pargomx/gecko/gko"
 )
 
 // Render satisface la interfaz gecko.Renderer
@@ -19,7 +20,7 @@ func (s *TemplateResponder) Render(w io.Writer, nombre string, data interface{},
 		s.ReParse()
 	}
 	if strings.HasSuffix(nombre, ".html") {
-		c.LogWarnf("plantilla.Render: no es necesario poner .html a '%v'", nombre)
+		gko.LogWarnf("plantilla.Render: no es necesario poner .html a '%v'", nombre)
 		nombre = strings.TrimSuffix(nombre, ".html")
 	}
 	return s.t.ExecuteTemplate(w, nombre, data)

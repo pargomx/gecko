@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/pargomx/gecko"
+	"github.com/pargomx/gecko/gko"
 )
 
 // TemplateResponder prepara plantillas html y las ejecuta con
@@ -28,7 +29,7 @@ type TemplateResponderFS struct {
 //
 // Las plantillas son accesibles sin el ".html"
 func NuevoServicioPlantillasEmbebidas(fsys fs.FS, tplsDir string) (*TemplateResponderFS, error) {
-	op := gecko.NewOp("plantillas.NuevoServicioPlantillasEmbebidas")
+	op := gko.Op("plantillas.NuevoServicioPlantillasEmbebidas")
 
 	// Plantilla de la cual colgarán todas.
 	rootTmpl := template.New("")
@@ -90,7 +91,7 @@ func NuevoServicioPlantillasEmbebidas(fsys fs.FS, tplsDir string) (*TemplateResp
 // Si la plantilla no existe, responde con el error definido en NuevoServicio.
 func (s *TemplateResponderFS) Render(w io.Writer, nombre string, data interface{}, c *gecko.Context) error {
 	if strings.HasSuffix(nombre, ".html") {
-		c.LogWarnf("plantilla.Render: no es necesario poner .html a '%v'", nombre)
+		gko.LogWarnf("plantilla.Render: no es necesario poner .html a '%v'", nombre)
 		nombre = strings.TrimSuffix(nombre, ".html")
 	}
 	return s.t.ExecuteTemplate(w, nombre, data)
@@ -112,5 +113,5 @@ func (s *TemplateResponderFS) Listar() {
 	for i, n := range nombres {
 		tms[i] = n
 	}
-	gecko.LogInfof("plantillas.Listar: %v", tms)
+	gko.LogInfof("plantillas.Listar: %v", tms)
 }

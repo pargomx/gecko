@@ -4,7 +4,7 @@ import (
 	"html/template"
 	"os"
 
-	"github.com/pargomx/gecko"
+	"github.com/pargomx/gecko/gko"
 )
 
 // TemplateResponder prepara plantillas html y las ejecuta con
@@ -54,7 +54,7 @@ type TemplateResponder struct {
 // "entidad/nuevo" para usar
 // "/xxx/plantillas/entidad/nuevo.html"
 func NuevoServicioPlantillas(carpeta string) (*TemplateResponder, error) {
-	op := gecko.NewOp("plantillas.NuevoServicioPlantillas")
+	op := gko.Op("plantillas.NuevoServicioPlantillas")
 
 	tmpl, err := findAndParseTemplates(carpeta, funcMap)
 	if err != nil {
@@ -67,7 +67,7 @@ func NuevoServicioPlantillas(carpeta string) (*TemplateResponder, error) {
 	}
 
 	if os.Getenv("LISTAR_PLANTILLAS") == "true" {
-		gecko.LogOkeyf("Plantillas preparadas desde %v", s.carpeta)
+		gko.LogOkeyf("Plantillas preparadas desde %v", s.carpeta)
 		s.Listar()
 	}
 

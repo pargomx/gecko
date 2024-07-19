@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/pargomx/gecko"
+	"github.com/pargomx/gecko/gko"
 )
 
 // Camina por el directorio especificado y prepara todas las
@@ -23,7 +23,7 @@ import (
 // Ejecutar "entidad/nuevo" utilizará el archivo
 // "/xxx/plantillas/entidad/nuevo.html"
 func findAndParseTemplates(tplsDir string, funcMap template.FuncMap) (*template.Template, error) {
-	op := gecko.NewOp("plantillas.findAndParseTemplates")
+	op := gko.Op("plantillas.findAndParseTemplates")
 
 	// Validar ruta a carpeta de plantillas.
 	tplsDir = filepath.Clean(tplsDir)
@@ -87,7 +87,7 @@ func findAndParseTemplates(tplsDir string, funcMap template.FuncMap) (*template.
 func (s *TemplateResponder) ReParse() {
 	newTmpl, err := findAndParseTemplates(s.carpeta, funcMap)
 	if err != nil {
-		gecko.LogWarnf("plantillas.ReParse: usando plantillas anteriores: %v", err)
+		gko.LogWarnf("plantillas.ReParse: usando plantillas anteriores: %v", err)
 		return
 	}
 	s.t = newTmpl
@@ -109,5 +109,5 @@ func (s *TemplateResponder) Listar() {
 	for i, n := range nombres {
 		tms[i] = n
 	}
-	gecko.LogInfof("plantillas.Listar: %v", tms)
+	gko.LogInfof("plantillas.Listar: %v", tms)
 }
