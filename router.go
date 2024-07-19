@@ -43,12 +43,10 @@ func (g *Gecko) registrarRuta(método string, ruta string, handler HandlerFunc) 
 			path:     patrón,
 			gecko:    g,
 		}
-		// Ejecutar handler.
+		// Ejecutar handler y manejar error.
 		err := handler(c)
 		if err != nil {
-			// c.LogError(err) // TODO: handle errors.
-			// g.HTTPErrorHandler(err, c)
-			g.GeckoHTTPErrorHandler(err, c)
+			g.ResponderHTTPHandlerError(err, c)
 		}
 	})
 	// fmt.Println("RUTA:", patrón)

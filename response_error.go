@@ -3,190 +3,78 @@ package gecko
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/pargomx/gecko/gko"
 )
 
-// Responder con el HTTPErrorHandler definido para gecko.
-func (c *Context) Error(err error) {
-	c.gecko.HTTPErrorHandler(err, c)
-}
-
-func errorHandler(err error, c *Context) {
-	statusCode := http.StatusInternalServerError // Default 500
-	mensaje := ""
-	logMsg := c.Request().URL.Path + " "
-	op := gko.Op(c.Request().URL.Path)
-
-	// Si es un error http de gecko (preferido)
-	if hee, ok := err.(*gko.Error); ok {
-		statusCode = hee.GetCodigoHTTP()
-		mensaje = hee.Error()
-		logMsg += hee.Error()
-
-	} else {
-		mensaje = err.Error()
-		logMsg += err.Error()
-	}
-
-	// Log error
-	if statusCode == 0 {
-		statusCode = http.StatusInternalServerError
-	}
-	if statusCode >= 400 {
-		gko.LogError(op.Err(err))
-	}
-
-	// Preparar respuesta
-	data := map[string]any{
-		"Mensaje":    mensaje,
-		"StatusCode": statusCode,
-	}
-
-	if mensaje == "" {
-		data["Mensaje"] = "Hubo un error al procesar tu solicitud. Intenta de manera diferente o contacta a soporte."
-	}
-
-	switch statusCode {
-	case http.StatusNotFound:
-		data["Titulo"] = "No encontrado"
-		data["Referer"] = c.Request().Referer()
-	case http.StatusInternalServerError:
-		data["Titulo"] = "Error en el servidor"
-	case http.StatusBadRequest:
-		data["Titulo"] = "Solicitud no procesada"
-	case http.StatusOK:
-		data["Titulo"] = "Listo :D"
-	default:
-		data["Titulo"] = fmt.Sprint("Error ", statusCode)
-	}
-
-	// Renderizar el estatus
-	if c.EsHTMX() {
-		c.String(statusCode, mensaje)
-	} else {
-		c.Render(statusCode, "error", data)
-	}
-}
-
-// El handler centralizado para errores de gecko.
+// El handler centralizado para enviar al cliente errores de gecko.
 //
-// NOTA: el error se ignora cuando se genera en un middleware después de
-// que un handler ya respondió algo al cliente y no hubo error con él.
-func (g *Gecko) GeckoHTTPErrorHandler(err error, c *Context) {
+// NOTA: el error se ignora cuando se genera en un middleware después
+// de que un handler ya respondió algo al cliente sin error.
+func (g *Gecko) ResponderHTTPHandlerError(err error, c *Context) {
 	if err == nil {
-		fmt.Println("PELIGRO: se retornó un err nil")
+		gko.LogAlertf("gko.ErrorHandler: err nil: %s", c.path)
 		return
 	}
 	if c == nil {
-		fmt.Println("PELIGRO: context nil en ErrorHandler")
+		gko.LogAlertf("gko.ErrorHandler: context nil: %v", err)
 		return
 	}
 	if c.Response().Committed {
-		fmt.Printf("PELIGRO: err generado luego de responder: %s %s %s\n", c.Request().Method, c.Request().URL.String(), err.Error())
+		gko.LogAlertf("gko.ErrorHandler: err returned after response: %s %s", c.path, err)
 		return
 	}
 
-	//* PREPARAR MENSAJE
-	statusCode := http.StatusInternalServerError
-	msgUsuario := ""
-	msgLog := ""
-
-	if errGecko, ok := err.(*gko.Error); ok {
-		// Si es un error gecko (preferido)
-		if errGecko == nil {
-			fmt.Println("err nil response_error")
-			return
-		}
-		statusCode = errGecko.GetCodigoHTTP()
-		msgUsuario = errGecko.GetMensaje()
-		msgLog += errGecko.Error()
-
-	} else {
-		// Si es un error genérico
-		msgUsuario = err.Error()
-		msgLog += err.Error()
+	// Agregar contexto al error y loggearlo.
+	gkerr := gko.Err(err)
+	gkerr.Op(c.path) // Patrón de ruta registrada para ubicar handler.
+	if len(c.SesionID) > 6 {
+		gkerr.Ctx("sesion", c.SesionID[:6]) // Saber usuario sin exponer sesión.
 	}
+	gkerr.Log()
 
-	if msgUsuario == "" {
-		msgUsuario = "Hubo un error, por favor intenta de otra manera o contacta a soporte."
-	}
-
-	ctx := c.Request().Method + " " + c.Request().URL.String()
-	if c.SesionID != "" {
-		ctx += " " + c.SesionID
-	}
-
-	if statusCode == 0 {
-		statusCode = http.StatusInternalServerError
-	}
-
-	//* REGISTRAR EN LOG
-	println(time.Now().Format("2006-01-02 15:04:05") + "\033[1;31m" + " [ERROR] " +
-		"\033[0;33m" + ctx + "\033[1;31m " + msgLog + "\033[0m")
-
-	//* RESPONDER AL CLIENTE
+	// gkerr.Op(c.Request().Method + " " + c.Request().URL.Path) // Ruta sin query.
+	// gkerr.Op(c.Request().Method + " " + c.Request().URL.String()) // Ruta con query.
 
 	// Método HEAD debe responder sin body.
 	if c.Request().Method == http.MethodHead {
-		err := c.NoContent(statusCode)
+		err := c.NoContent(gkerr.GetCodigoHTTP())
 		if err != nil {
-			fmt.Println("PELIGRO: error al enviar error head: " + err.Error())
+			gko.LogAlert("gko.ErrorHandler: head response: " + err.Error())
 		}
 		return
 	}
 
 	// HTMX solo necesita un string.
 	if c.EsHTMX() {
-		err = c.String(statusCode, msgUsuario)
+		err = c.String(gkerr.GetCodigoHTTP(), gkerr.GetMensaje())
 		if err != nil {
-			fmt.Println("PELIGRO: error al enviar error htmx: " + err.Error())
+			gko.LogAlert("gko.ErrorHandler: htmx response: " + err.Error())
 		}
 		return
 	}
 
 	// Mandar plantilla con el error.
-	// if g.ErrorTemplate != "" {
-	// 	data := map[string]any{
-	// 		"Mensaje":    msgUsuario,
-	// 		"StatusCode": fmt.Sprint(code),
-	// 		"Sesion":     c.Sesion,
-	// 		"Titulo":     errorTitulo(code),
-	// 	}
-	// 	err = c.Render(code, e.ErrorTemplate, data)
-	// 	if err != nil {
-	// 		fmt.Println("PELIGRO: error al enviar error: " + err.Error())
-	// 	}
-	// } else {
-	// c.String(code, msgUsuario)
-	// }
-
-	// Preparar respuesta
-	data := map[string]any{
-		"Mensaje":    msgUsuario,
-		"StatusCode": statusCode,
-	}
-	if msgUsuario == "" {
-		data["Mensaje"] = "Hubo un error al procesar tu solicitud. Intenta de manera diferente o contacta a soporte."
-	}
-	switch statusCode {
-	case http.StatusNotFound:
-		data["Titulo"] = "No encontrado"
-		data["Referer"] = c.Request().Referer()
-	case http.StatusInternalServerError:
-		data["Titulo"] = "Error en el servidor"
-	case http.StatusBadRequest:
-		data["Titulo"] = "Solicitud no procesada"
-	case http.StatusOK:
-		data["Titulo"] = "Listo :D"
-	default:
-		data["Titulo"] = fmt.Sprint("Error ", statusCode)
+	if g.Renderer != nil {
+		data := map[string]any{
+			"Mensaje":    gkerr.GetMensaje(),
+			"StatusCode": gkerr.GetCodigoHTTP(),
+			"Titulo":     "Ups: " + gkerr.GetMensaje(),
+			// TODO: poner datos de sesión si la hay.
+		}
+		err = c.Render(gkerr.GetCodigoHTTP(), g.TmplError, data)
+		if err != nil {
+			gko.LogAlert("gko.ErrorHandler: render err: " + err.Error())
+		}
+		return
 	}
 
-	if c.EsHTMX() {
-		c.String(statusCode, msgUsuario)
-	} else {
-		c.Render(statusCode, "error", data)
+	// Default: responder con texto.
+	err = c.HTML(gkerr.GetCodigoHTTP(), fmt.Sprintf(
+		`<html><head><title>Error %d</title></head><body style="background-color:black;color:white;"><h2>%s</h2><a href="/" style="color:aqua;">Ir a inicio</a></body></html>`,
+		gkerr.GetCodigoHTTP(), gkerr.GetMensaje(),
+	))
+	if err != nil {
+		gko.LogAlert("gko.ErrorHandler: default response: " + err.Error())
 	}
 }

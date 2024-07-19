@@ -25,14 +25,14 @@ import (
 //   - Solicitudes "/hola" y "/hola/" usarán el mismo handler.
 //   - Solicitud "/hola/x/y/z" no usará el handler de "/hola/".
 type Gecko struct {
-	mux              *http.ServeMux
-	IPExtractor      IPExtractor
-	Renderer         Renderer
-	HTTPErrorHandler func(err error, c *Context)
+	mux         *http.ServeMux
+	IPExtractor IPExtractor
+	Renderer    Renderer
 
 	Filesystem fs.FS // Utilizado por los file handlers.
 
-	TmplBaseLayout string
+	TmplBaseLayout string // Nombre de la plantilla base.
+	TmplError      string // Nombre de la plantilla para errores.
 }
 
 // Implementa la interfaz http.Handler.
@@ -55,11 +55,10 @@ func New() *Gecko {
 
 		Filesystem: os.DirFS(pwd),
 
-		HTTPErrorHandler: errorHandler,
-
 		IPExtractor: ExtractIPFromRealIPHeader(),
 
 		TmplBaseLayout: "base_layout",
+		TmplError:      "error",
 	}
 }
 

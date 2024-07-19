@@ -28,6 +28,19 @@ func main() {
 		return c.String(http.StatusTeapot, "I'm a teapot\n")
 	})
 
+	g.GET("/error", func(c *gecko.Context) error {
+		return gko.ErrNoEncontrado().Msg("Error de prueba").Str("huehuehue")
+	})
+
+	g.GET("/o", func(c *gecko.Context) error {
+		// Este método no registra el error en log.
+		return c.StatusBadRequest("Hummm")
+	})
+
+	g.GET("/u", func(c *gecko.Context) error {
+		return gko.ErrDatoIndef().Msg("Datos indefinidos")
+	})
+
 	if socket != "" {
 		err := g.IniciarEnSocket(socket)
 		if err != nil {
