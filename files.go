@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -42,7 +43,7 @@ func fsFile(c *Context, fpath string, filesystem fs.FS) error {
 	// Enviar el archivo.
 	ff, ok := file.(io.ReadSeeker)
 	if !ok {
-		return errors.New("file does not implement io.ReadSeeker")
+		return gko.ErrInesperado().Str("file does not implement io.ReadSeeker")
 	}
 	http.ServeContent(c.Response(), c.Request(), fi.Name(), fi.ModTime(), ff)
 	return nil
@@ -51,20 +52,22 @@ func fsFile(c *Context, fpath string, filesystem fs.FS) error {
 // Se servirá el index.html si existe en el directorio fpath.
 func fsDirIndex(c *Context, fpath string, fi fs.FileInfo, filesystem fs.FS) error {
 	if !fi.IsDir() {
-		return errors.New("fpath is not a directory")
+		return gko.ErrInesperado().Str("fpath is not a directory")
 	}
 	fpath = filepath.ToSlash(filepath.Join(fpath, "index.html"))
 	// Abrir el archivo.
 	file, err := filesystem.Open(fpath)
 	if err != nil {
-		gko.Err(err).Op("fsFile.Open('" + fpath + "')").Log()
+		if !errors.Is(err, fs.ErrNotExist) {
+			gko.Err(err).Op("fsDirIndex.Open('" + fpath + "')").Log()
+		}
 		return gko.ErrNoEncontrado()
 	}
 	defer file.Close()
 	// Enviar el archivo.
 	ff, ok := file.(io.ReadSeeker)
 	if !ok {
-		return errors.New("file does not implement io.ReadSeeker")
+		return gko.ErrInesperado().Str("file does not implement io.ReadSeeker")
 	}
 	http.ServeContent(c.Response(), c.Request(), fi.Name(), fi.ModTime(), ff)
 	return nil
@@ -151,14 +154,59 @@ func (c *Context) FileInline(file, name string) error {
 // ================================================================ //
 // ========== SERVIR DIRECTORIOS ================================== //
 
-// Crea un filesystem en donde el `fsRoot` sea la nueva raíz.
-func mustSubFS(currentFs fs.FS, fsRoot string) fs.FS {
-	fsRoot = filepath.ToSlash(filepath.Clean(fsRoot))
-	subFs, err := fs.Sub(currentFs, fsRoot)
+// Crea un filesystem en donde el `subdir` es la nueva raíz.
+// La ruta debe ser un subdirectorio relativo al filesystem dado.
+//
+// No se permiten rutas absolutas ni fuera de la raíz del fs dado,
+// pero no se verifica que los symlink no escapen del nuevo root.
+func mustSubFS(currentFs fs.FS, subdir string) fs.FS {
+	subdir = filepath.ToSlash(filepath.Clean(subdir))
+	if subdir == "." || subdir == "./" || subdir == "" {
+		gko.FatalExitf("subdir inválido: utilice Static(...) para servir '%s'", subdir)
+	}
+	if strings.HasPrefix(subdir, "/") {
+		gko.FatalExitf("subdir inválido: '%s' no es relativo", subdir)
+	}
+	if strings.HasPrefix(subdir, "..") {
+		gko.FatalExitf("subdir inválido: no se permite '../' en %s", subdir)
+	}
+	rootInfo, err := fs.Stat(currentFs, subdir)
 	if err != nil {
-		gko.FatalExitf("imposible crear subFS: invalid root: %v", err)
+		gko.FatalExitf("subdir inválido: %v", err)
+	}
+	if !rootInfo.IsDir() {
+		gko.FatalExitf("subdir inválido: %s no es un directorio", subdir)
+	}
+	subFs, err := fs.Sub(currentFs, subdir)
+	if err != nil {
+		gko.FatalExitf("imposible crear subFS: subdir inválido: %v", err)
 	}
 	return subFs
+}
+
+// Registra una ruta para servir archivos estáticos desde un directorio
+// absoluto desde el root filesystem del sistema operativo.
+// Usar con precaución y usar `StaticSub` o `StaticPwd` si es posible.
+//
+// Por ejemplo:
+//
+//	g.StaticAbs("/x", "/home/user/static")
+//
+// Servirá "/home/user/static/hola.html" en la ruta "/x/hola.html"
+func (g *Gecko) StaticAbs(rutaWeb string, absolutePath string) {
+	if !filepath.IsAbs(absolutePath) {
+		gko.FatalExitf("ruta absoluta inválida: %s", absolutePath)
+	}
+	rootInfo, err := os.Stat(absolutePath)
+	if err != nil {
+		gko.FatalExitf("ruta absoluta inválida: %v", err)
+	}
+	if !rootInfo.IsDir() {
+		gko.FatalExitf("ruta absoluta inválida: %s no es un directorio", absolutePath)
+	}
+	handler := staticDirectoryHandler(os.DirFS(absolutePath))
+	g.registrarRuta(http.MethodGet, rutaWeb, handler)
+	g.registrarRuta(http.MethodGet, path.Join(rutaWeb, "{fpath...}"), handler)
 }
 
 // Se registra tanto /files como /files/*. para que el mux no redireccione
@@ -166,21 +214,48 @@ func mustSubFS(currentFs fs.FS, fsRoot string) fs.FS {
 
 // Registra una ruta para servir archivos en el directorio actual
 // desde la ruta dada.
-func (g *Gecko) Static(pathPrefix string) {
+//
+// Por ejemplo, si el directorio actual es "/home/user" y se llama
+//
+//	g.StaticDir("/static")
+//
+// Servirá "/home/user/hola.html" en la ruta "/static/hola.html"
+//
+// Cuando la ruta solicitada es un directorio se intentará servir
+// el archivo index.html en ese directorio. Si no existe retorna 404.
+func (g *Gecko) StaticPwd(rutaWeb string) {
 	handler := staticDirectoryHandler(g.Filesystem)
-	g.registrarRuta(http.MethodGet, pathPrefix, handler)
-	g.registrarRuta(http.MethodGet, path.Join(pathPrefix, "{fpath...}"), handler)
+	g.registrarRuta(http.MethodGet, rutaWeb, handler)
+	g.registrarRuta(http.MethodGet, path.Join(rutaWeb, "{fpath...}"), handler)
 }
 
-// Registra una ruta para servir archivos en el directorio dado.
-func (g *Gecko) StaticSub(pathPrefix string, fsRoot string) {
-	handler := staticDirectoryHandler(mustSubFS(g.Filesystem, fsRoot))
-	g.registrarRuta(http.MethodGet, pathPrefix, handler)
-	g.registrarRuta(http.MethodGet, path.Join(pathPrefix, "{fpath...}"), handler)
+// Registra una ruta para servir archivos en el subdirectorio dado.
+//
+// La ruta debe ser relativa al directorio actual, por ejemplo:
+//
+//	g.StaticSub("/x", "static")
+//	g.StaticSub("/y", "./static/img")
+//
+//	La ruta "/x" servirá el archivo "static/index.html"
+//	La ruta "/x/img/1.png" servirá el archivo "static/img/1.png"
+//	La ruta "/y/1.png" servirá el archivo "static/img/1.png"
+//
+// Una ruta absoluta es inválida, así como la ruta de un archivo.
+// Para servir el directorio actual usar `g.Static("/")`.
+func (g *Gecko) StaticSub(rutaWeb string, subdir string) {
+	handler := staticDirectoryHandler(mustSubFS(g.Filesystem, subdir))
+	g.registrarRuta(http.MethodGet, rutaWeb, handler)
+	g.registrarRuta(http.MethodGet, path.Join(rutaWeb, "{fpath...}"), handler)
 }
 
 // Registra una ruta para servir archivos estáticos desde un filesystem dado.
-// Para `//go:embed static/img` usar `fs := gecko.MustSubFS(fs, "static/img")`.
+// Es útil para servir archivos embebidos, por ejemplo:
+//
+//	//go:embed static/img
+//	var fs embed.FS
+//	fs := gecko.StaticFS("/x", fs)
+//
+// La ruta "/x/static/img/1.png" servirá el archivo "static/img/1.png
 func (g *Gecko) StaticFS(pathPrefix string, filesystem fs.FS) {
 	handler := staticDirectoryHandler(filesystem)
 	g.registrarRuta(http.MethodGet, pathPrefix, handler)
@@ -189,6 +264,16 @@ func (g *Gecko) StaticFS(pathPrefix string, filesystem fs.FS) {
 
 // Registra una ruta para servir archivos estáticos desde un filesystem dado
 // quitando el prefijo de la ruta.
+// Es útil para servir archivos embebidos, por ejemplo:
+//
+//	//go:embed static/img
+//	var fs embed.FS
+//	fs := gecko.StaticSubFS("/x", "static/img", fs)
+//
+// La ruta "/x/1.png" servirá el archivo "static/img/1.png
+//
+// Es necesario poner el subdir fsRoot porque `//go:embed assets/images`
+// embebe archivos con el path incluyendo `assets/images` como prefijo.
 func (g *Gecko) StaticSubFS(pathPrefix string, fsRoot string, filesystem fs.FS) {
 	handler := staticDirectoryHandler(mustSubFS(filesystem, fsRoot))
 	g.registrarRuta(http.MethodGet, pathPrefix, handler)

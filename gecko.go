@@ -30,14 +30,7 @@ type Gecko struct {
 	Renderer         Renderer
 	HTTPErrorHandler func(err error, c *Context)
 
-	// Filesystem is file system used by Static and File handlers to access
-	// files. Defaults to os.DirFS(".")
-	//
-	// When dealing with `embed.FS` use `fs := gecko.MustSubFS(fs,
-	// "rootDirectory") to create sub fs which uses necessary prefix for
-	// directory path. This is necessary as `//go:embed assets/images` embeds
-	// files with paths including `assets/images` as their prefix.
-	Filesystem fs.FS
+	Filesystem fs.FS // Utilizado por los file handlers.
 
 	TmplBaseLayout string
 }
