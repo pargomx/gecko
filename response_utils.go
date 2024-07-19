@@ -15,6 +15,9 @@ func (c *Context) HTMLBlob(code int, b []byte) (err error) {
 }
 
 // Responder con status code y MIME "text/plain" UTF8.
+//
+// Preferible usar c.StringOk("msg") o retornar un error
+// para que sí quede registrado en el log por el ErrHandler.
 func (c *Context) String(code int, s string) (err error) {
 	return c.Blob(code, MIMETextPlainCharsetUTF8, []byte(s))
 }
@@ -44,7 +47,7 @@ func (c *Context) NoContent(code int) error {
 // ================================================================ //
 
 func (c *Context) writeContentType(value string) {
-	header := c.Response().Header()
+	header := c.response.Header()
 	if header.Get(HeaderContentType) == "" {
 		header.Set(HeaderContentType, value)
 	}

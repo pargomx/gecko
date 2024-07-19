@@ -13,15 +13,15 @@ import (
 // de que un handler ya respondió algo al cliente sin error.
 func (g *Gecko) ResponderHTTPHandlerError(err error, c *Context) {
 	if err == nil {
-		gko.LogAlertf("gko.ErrorHandler: err nil: %s", c.path)
+		gko.LogAlertf("gko.ErrHandler: err nil: %s", c.path)
 		return
 	}
 	if c == nil {
-		gko.LogAlertf("gko.ErrorHandler: context nil: %v", err)
+		gko.LogAlertf("gko.ErrHandler: context nil: %v", err)
 		return
 	}
-	if c.Response().Committed {
-		gko.LogAlertf("gko.ErrorHandler: err returned after response: %s %s", c.path, err)
+	if c.response.Committed {
+		gko.LogAlertf("gko.ErrHandler: err returned after response: %s %s", c.path, err)
 		return
 	}
 
@@ -40,7 +40,7 @@ func (g *Gecko) ResponderHTTPHandlerError(err error, c *Context) {
 	if c.Request().Method == http.MethodHead {
 		err := c.NoContent(gkerr.GetCodigoHTTP())
 		if err != nil {
-			gko.LogAlert("gko.ErrorHandler: head response: " + err.Error())
+			gko.LogAlert("gko.ErrHandler: head response: " + err.Error())
 		}
 		return
 	}
@@ -49,7 +49,7 @@ func (g *Gecko) ResponderHTTPHandlerError(err error, c *Context) {
 	if c.EsHTMX() {
 		err = c.String(gkerr.GetCodigoHTTP(), gkerr.GetMensaje())
 		if err != nil {
-			gko.LogAlert("gko.ErrorHandler: htmx response: " + err.Error())
+			gko.LogAlert("gko.ErrHandler: htmx response: " + err.Error())
 		}
 		return
 	}
@@ -64,7 +64,7 @@ func (g *Gecko) ResponderHTTPHandlerError(err error, c *Context) {
 		}
 		err = c.Render(gkerr.GetCodigoHTTP(), g.TmplError, data)
 		if err != nil {
-			gko.LogAlert("gko.ErrorHandler: render err: " + err.Error())
+			gko.LogAlert("gko.ErrHandler: render err: " + err.Error())
 		}
 		return
 	}
@@ -75,6 +75,6 @@ func (g *Gecko) ResponderHTTPHandlerError(err error, c *Context) {
 		gkerr.GetCodigoHTTP(), gkerr.GetMensaje(),
 	))
 	if err != nil {
-		gko.LogAlert("gko.ErrorHandler: default response: " + err.Error())
+		gko.LogAlert("gko.ErrHandler: default response: " + err.Error())
 	}
 }

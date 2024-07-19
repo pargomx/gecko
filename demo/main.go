@@ -34,7 +34,7 @@ func main() {
 
 	g.GET("/o", func(c *gecko.Context) error {
 		// Este método no registra el error en log.
-		return c.StatusBadRequest("Hummm")
+		return c.String(200, "Hummm")
 	})
 
 	g.GET("/u", func(c *gecko.Context) error {
