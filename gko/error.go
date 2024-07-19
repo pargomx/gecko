@@ -38,7 +38,7 @@ const (
 func Op(op string) *Error { return &Error{operación: op} }
 
 func ErrInesperado() *Error   { return &Error{tipo: tipoErrInesperado} }
-func ErrNoEncntrado() *Error  { return &Error{tipo: tipoErrNoEncontrado} }
+func ErrNoEncontrado() *Error { return &Error{tipo: tipoErrNoEncontrado} }
 func ErrYaExiste() *Error     { return &Error{tipo: tipoErrYaExiste} }
 func ErrHayHuerfanos() *Error { return &Error{tipo: tipoErrHayHuerfanos} }
 func ErrTooManyReq() *Error   { return &Error{tipo: tipoErrTooManyReq} }

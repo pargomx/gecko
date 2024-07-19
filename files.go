@@ -26,7 +26,7 @@ func fsFile(c *Context, fpath string, filesystem fs.FS) error {
 		if !errors.Is(err, fs.ErrNotExist) {
 			gko.Err(err).Op("fsFile.Stat('" + fpath + "')").Log()
 		}
-		return gko.ErrNoEncntrado()
+		return gko.ErrNoEncontrado()
 	}
 	// Si es un directorio se sirve el index.html
 	if fi.IsDir() {
@@ -36,7 +36,7 @@ func fsFile(c *Context, fpath string, filesystem fs.FS) error {
 	file, err := filesystem.Open(fpath)
 	if err != nil {
 		gko.Err(err).Op("fsFile.Open('" + fpath + "')").Log()
-		return gko.ErrNoEncntrado()
+		return gko.ErrNoEncontrado()
 	}
 	defer file.Close()
 	// Enviar el archivo.
@@ -58,7 +58,7 @@ func fsDirIndex(c *Context, fpath string, fi fs.FileInfo, filesystem fs.FS) erro
 	file, err := filesystem.Open(fpath)
 	if err != nil {
 		gko.Err(err).Op("fsFile.Open('" + fpath + "')").Log()
-		return gko.ErrNoEncntrado()
+		return gko.ErrNoEncontrado()
 	}
 	defer file.Close()
 	// Enviar el archivo.
