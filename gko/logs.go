@@ -91,6 +91,10 @@ func FatalError(err error) {
 	LogError(err)
 	os.Exit(1)
 }
+func (e *Error) FatalExit() {
+	e.Log()
+	os.Exit(1)
+}
 
 // ================================================================ //
 // ========== ERROR =============================================== //
@@ -151,36 +155,58 @@ func LogError(err error) {
 
 // Log imprime el error gecko con colores en la consola.
 func (e *Error) Log() {
-
 	// 2020-11-25 18:54:32
 	msg := timestamp()
-
 	// 2020-11-25 18:54:32 [ERROR] (404)
 	if e.tipo == 0 {
 		msg += bRed + "[ERROR]" + reset
 	} else {
 		msg += bRed + fmt.Sprintf("[ERROR] (%d)", e.tipo) + reset
 	}
-
 	// 2020-11-25 18:54:32 [ERROR] (404) DoSomething > GetRecord
 	if e.operación != "" {
 		msg += " " + rYellow + e.operación
 	}
-
 	// [ERROR] (404) DoSomething > GetRecord: Usuario no encontrado.
 	if e.mensaje != "" {
 		msg += " " + bRed + e.mensaje + "." + reset
 	}
-
 	// [ERROR] (404) DoSomething > GetRecord: Usuario no encontrado. {id=123}
 	if e.valores != "" {
 		msg += " " + rPurple + e.valores
 	}
-
 	// [ERROR] (404) DoSomething > GetRecord: Usuario no encontrado. {id=123} sql: no rows
 	if e.texto != "" {
 		msg += " " + rRed + e.texto
 	}
+	println(msg + reset)
+}
 
+// Imprime una advertencia en la consola con los datos disponibles en el error.
+func (e *Error) Alert() {
+	// 2020-11-25 18:54:32
+	msg := timestamp()
+	// 2020-11-25 18:54:32 [ALERT] (404)
+	if e.tipo == 0 {
+		msg += bYellow + "[ALERT]" + reset
+	} else {
+		msg += bYellow + fmt.Sprintf("[ALERT] (%d)", e.tipo) + reset
+	}
+	// 2020-11-25 18:54:32 [ALERT] (404) DoSomething > GetRecord
+	if e.operación != "" {
+		msg += " " + cYellow + e.operación
+	}
+	// [ALERT] (404) DoSomething > GetRecord: Usuario no encontrado.
+	if e.mensaje != "" {
+		msg += " " + cWhite + e.mensaje + "." + reset
+	}
+	// [ALERT] (404) DoSomething > GetRecord: Usuario no encontrado. {id=123}
+	if e.valores != "" {
+		msg += " " + rPurple + e.valores
+	}
+	// [ALERT] (404) DoSomething > GetRecord: Usuario no encontrado. {id=123} sql: no rows
+	if e.texto != "" {
+		msg += " " + rRed + e.texto
+	}
 	println(msg + reset)
 }
