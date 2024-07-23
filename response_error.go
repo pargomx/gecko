@@ -60,7 +60,9 @@ func (g *Gecko) ResponderHTTPHandlerError(err error, c *Context) {
 			"Mensaje":    gkerr.GetMensaje(),
 			"StatusCode": gkerr.GetCodigoHTTP(),
 			"Titulo":     "Ups: " + gkerr.GetMensaje(),
-			// TODO: poner datos de sesión si la hay.
+		}
+		if c.Sesion != nil {
+			data["Sesion"] = c.Sesion
 		}
 		err = c.Render(gkerr.GetCodigoHTTP(), g.TmplError, data)
 		if err != nil {

@@ -11,12 +11,12 @@ import (
 
 // Renderer is the interface that wraps the Render function.
 type Renderer interface {
-	Render(io.Writer, string, interface{}, *Context) error
+	Render(io.Writer, string, any, *Context) error
 }
 
 // Renderizar una plantilla registrada en gecko.Renderer bajo "name"
 // y responder con MIME "text/html" y el status "code".
-func (c *Context) Render(code int, name string, data interface{}) error {
+func (c *Context) Render(code int, name string, data any) error {
 	if c.gecko.Renderer == nil {
 		return gko.ErrNoDisponible().Str("gecko: renderer nulo")
 	}
@@ -39,6 +39,9 @@ func (c *Context) RenderOk(name string, data map[string]any) error {
 	}
 	if data == nil {
 		data = map[string]any{}
+	}
+	if c.Sesion != nil {
+		data["Sesion"] = c.Sesion
 	}
 
 	if c.EsHTMX() { // Enviar solo parcial a HTMX
@@ -80,6 +83,9 @@ func (c *Context) RenderContenido(name string, data map[string]any) error {
 	if data == nil {
 		data = map[string]any{}
 	}
+	if c.Sesion != nil {
+		data["Sesion"] = c.Sesion
+	}
 
 	if c.EsHTMX() { // Enviar solo parcial a HTMX
 
@@ -119,6 +125,9 @@ func (c *Context) RenderCard(name string, data map[string]any) error {
 	}
 	if data == nil {
 		data = map[string]any{}
+	}
+	if c.Sesion != nil {
+		data["Sesion"] = c.Sesion
 	}
 
 	c.response.Header().Add("Cache-Control", "no-store") // ningún caché

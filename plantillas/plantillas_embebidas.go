@@ -89,7 +89,7 @@ func NuevoServicioPlantillasEmbebidas(fsys fs.FS, tplsDir string) (*TemplateResp
 // Ejecuta una plantilla previamente instanciada al crear el servicio.
 //
 // Si la plantilla no existe, responde con el error definido en NuevoServicio.
-func (s *TemplateResponderFS) Render(w io.Writer, nombre string, data interface{}, c *gecko.Context) error {
+func (s *TemplateResponderFS) Render(w io.Writer, nombre string, data any, c *gecko.Context) error {
 	if strings.HasSuffix(nombre, ".html") {
 		gko.LogWarnf("plantilla.Render: no es necesario poner .html a '%v'", nombre)
 		nombre = strings.TrimSuffix(nombre, ".html")

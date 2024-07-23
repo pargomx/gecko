@@ -15,7 +15,7 @@ import (
 // Ejecuta una plantilla previamente instanciada al crear el servicio.
 //
 // Si la plantilla no existe, responde con el error definido en NuevoServicio.
-func (s *TemplateResponder) Render(w io.Writer, nombre string, data interface{}, c *gecko.Context) error {
+func (s *TemplateResponder) Render(w io.Writer, nombre string, data any, c *gecko.Context) error {
 	if s.reparse {
 		s.ReParse()
 	}

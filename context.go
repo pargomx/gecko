@@ -14,6 +14,7 @@ type Context struct {
 	query    url.Values
 	gecko    *Gecko
 	SesionID string
+	Sesion   any
 }
 
 func (c *Context) Request() *http.Request {

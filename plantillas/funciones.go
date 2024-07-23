@@ -100,7 +100,7 @@ var funcMap = template.FuncMap{
 		}
 	},
 
-	"colorHash": func(val ...interface{}) string {
+	"colorHash": func(val ...any) string {
 		str := fmt.Sprint(val...)
 		hash := sha1.New()
 		hash.Write([]byte(str))
