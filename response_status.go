@@ -48,7 +48,7 @@ func (c *Context) Redirect(code int, url string) error {
 	return nil
 }
 
-// Redirige a la URL usando fmt.Sprintf con código 303 TemporaryRedirect.
+// Redirige a la URL usando fmt.Sprintf con código 303 StatusSeeOther.
 func (c *Context) Redir(format string, a ...any) error {
 	c.response.Header().Set(HeaderLocation, fmt.Sprintf(format, a...))
 	c.response.WriteHeader(303)
