@@ -58,7 +58,7 @@ func New() *Gecko {
 		IPExtractor: ExtractIPFromRealIPHeader(),
 
 		TmplBaseLayout: "base_layout",
-		TmplError:      "error",
+		TmplError:      "",
 	}
 }
 

@@ -55,7 +55,7 @@ func (g *Gecko) ResponderHTTPHandlerError(err error, c *Context) {
 	}
 
 	// Mandar plantilla con el error.
-	if g.Renderer != nil {
+	if g.Renderer != nil && g.TmplError != "" {
 		data := map[string]any{
 			"Mensaje":    gkerr.GetMensaje(),
 			"StatusCode": gkerr.GetCodigoHTTP(),
