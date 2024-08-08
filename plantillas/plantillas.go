@@ -53,7 +53,7 @@ type TemplateResponder struct {
 //
 // "entidad/nuevo" para usar
 // "/xxx/plantillas/entidad/nuevo.html"
-func NuevoServicioPlantillas(carpeta string) (*TemplateResponder, error) {
+func NuevoServicioPlantillas(carpeta string, reparse bool) (*TemplateResponder, error) {
 	op := gko.Op("plantillas.NuevoServicioPlantillas")
 
 	tmpl, err := findAndParseTemplates(carpeta, funcMap)
@@ -64,19 +64,12 @@ func NuevoServicioPlantillas(carpeta string) (*TemplateResponder, error) {
 	s := &TemplateResponder{
 		t:       tmpl,
 		carpeta: carpeta,
+		reparse: reparse,
 	}
 
 	if os.Getenv("LISTAR_PLANTILLAS") == "true" {
 		gko.LogOkeyf("Plantillas preparadas desde %v", s.carpeta)
 		s.Listar()
-	}
-
-	if os.Getenv("AMBIENTE") == "desarrollo" ||
-		os.Getenv("REPARSE_PLANTILLAS") == "true" {
-		s.reparse = true
-	}
-	if os.Getenv("REPARSE_PLANTILLAS") == "false" {
-		s.reparse = false
 	}
 
 	return s, nil
