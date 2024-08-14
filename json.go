@@ -10,9 +10,28 @@ import (
 func (c *Context) JSONUnmarshal(v any) error {
 	err := json.NewDecoder(c.request.Body).Decode(v)
 	if ute, ok := err.(*json.UnmarshalTypeError); ok {
+		return gko.Err(err).Strf("Unmarshal type error: expected=%v, got=%v, field=%v, offset=%v", ute.Type, ute.Value, ute.Field, ute.Offset)
+	} else if se, ok := err.(*json.SyntaxError); ok {
+		return gko.Err(err).Strf("Syntax error: offset=%v", se.Offset)
+	}
+	return err
+}
+
+func (c *Context) JSONUnmarshalFile(name string, v any) error {
+	fileHeader, err := c.FormFile(name)
+	if err != nil {
+		return gko.Err(err).Op("JSONUnmarshalFile").Ctx("name", name)
+	}
+	file, err := fileHeader.Open()
+	if err != nil {
+		return gko.Err(err).Op("JSONUnmarshalFile").Ctx("name", name)
+	}
+	defer file.Close()
+	err = json.NewDecoder(file).Decode(v)
+	if ute, ok := err.(*json.UnmarshalTypeError); ok {
 		return gko.Err(err).Msgf("Unmarshal type error: expected=%v, got=%v, field=%v, offset=%v", ute.Type, ute.Value, ute.Field, ute.Offset)
 	} else if se, ok := err.(*json.SyntaxError); ok {
-		return gko.Err(err).Msgf("Syntax error: offset=%v, error=%v", se.Offset, se.Error())
+		return gko.Err(err).Msgf("Syntax error: offset=%v", se.Offset)
 	}
 	return err
 }
