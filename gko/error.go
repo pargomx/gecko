@@ -98,6 +98,13 @@ func (e *Error) Str(txt string) *Error {
 	return e
 }
 
+// Definir un mensaje dirigido al usuario con fmt.Sprintf().
+// Subsecuentes llamadas se concatenan con ":".
+func (e *Error) Strf(format string, a ...any) *Error {
+	e.Str(fmt.Sprintf(format, a...))
+	return e
+}
+
 // Definir un mensaje dirigido al usuario.
 // Subsecuentes llamadas se concatenan con ":".
 func (e *Error) Msg(msg string) *Error {
