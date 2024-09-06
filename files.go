@@ -111,9 +111,39 @@ func (g *Gecko) FileFS(path, file string, filesystem fs.FS) {
 }
 
 // Registra una nueva ruta para servir un archivo.
+// Debe ser una ruta relativa por lo regular.
 func (g *Gecko) File(path, file string) {
 	g.registrarRuta(http.MethodGet, path, func(c *Context) error {
 		return fsFile(c, file, c.gecko.Filesystem)
+	})
+}
+
+// Registra una nueva ruta para servir un archivo con path absoluta.
+// Jamás poner a disposición del usuario!
+func (g *Gecko) FileAbs(path, fpath string) {
+	if !filepath.IsAbs(fpath) {
+		gko.FatalExitf("ruta absoluta inválida: %s", fpath)
+	}
+	fi, err := os.Stat(fpath)
+	if err != nil {
+		gko.Err(err).Op("FileAbs.Stat('" + fpath + "')").FatalExit()
+	}
+	if fi.IsDir() {
+		gko.FatalExitf("FileAbs('%s') es un directorio", fpath)
+	}
+	g.registrarRuta(http.MethodGet, path, func(c *Context) error {
+		fi, err = os.Stat(fpath)
+		if err != nil {
+			gko.Err(err).Op("FileAbs.Stat('" + fpath + "')").FatalExit()
+		}
+		file, err := os.Open(fpath)
+		if err != nil {
+			gko.Err(err).Op("FileAbs.Open('" + fpath + "')").Log()
+			return gko.ErrNoEncontrado()
+		}
+		defer file.Close()
+		http.ServeContent(c.response, c.request, fi.Name(), fi.ModTime(), file)
+		return nil
 	})
 }
 
