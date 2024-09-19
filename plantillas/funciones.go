@@ -78,6 +78,9 @@ var funcMap = template.FuncMap{
 	"fechaCompleta":    FechaEsp,
 	"fechaCompletaHoy": func() string { return FechaEsp(time.Now()) },
 
+	// * HTML
+	"enfatizar": Enfatizar,
+
 	// * ARCHIVOS
 	"filesize": ByteCountSI,
 
