@@ -100,6 +100,11 @@ func (c *Context) SetCookie(cookie *http.Cookie) {
 	http.SetCookie(c.response, cookie)
 }
 
+// El path con el que se registró el handler en el Mux. Ejemplos:
+//
+//	"GET /{}"
+//	"GET /things/{id}"
+//	"POST /somenthing"
 func (c *Context) Path() string {
 	return c.path
 }

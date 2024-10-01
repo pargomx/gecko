@@ -50,10 +50,6 @@ var funcMap = template.FuncMap{
 		return "\n"
 	},
 
-	"timestamp": func() string {
-		return time.Now().Format("2006-01-02 15:04:05 MST")
-	},
-
 	"lower": strings.ToLower,
 	"upper": strings.ToUpper,
 
@@ -71,12 +67,14 @@ var funcMap = template.FuncMap{
 	"pesos":        CentavosToPesos,
 
 	// * TIEMPO
-	"horasMinutos":   fmtHorasMinutos,
-	"numeroEnLetras": NumeroEnLetras,
-	"edad":           EdadPtr,
-
+	"horasMinutos":     fmtHorasMinutos,
+	"numeroEnLetras":   NumeroEnLetras,
+	"edad":             EdadPtr,
+	"timestamp":        timestamp,
 	"fechaCompleta":    FechaEsp,
 	"fechaCompletaHoy": func() string { return FechaEsp(time.Now()) },
+	"minutosToString":  MinutosToString,
+	"segundosToString": SegundosToString,
 
 	// * HTML
 	"enfatizar": Enfatizar,
