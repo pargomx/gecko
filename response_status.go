@@ -48,8 +48,31 @@ func (c *Context) Redirect(code int, url string) error {
 	return nil
 }
 
-// Redirige a la URL usando fmt.Sprintf con código 303 StatusSeeOther.
-func (c *Context) Redir(format string, a ...any) error {
+// Redirige a la URL usando fmt.Sprintf para construir el path.
+//
+// Normal: 303 StatusSeeOther & header Location.
+//
+// HTMX: 200 OK "Redirigiendo a..." & header HX-Redirect.
+func (c *Context) Redir(url string) error {
+	if c.EsHTMX() {
+		c.response.Header().Set("HX-Redirect", url)
+		return c.StatusOk("Redirigiendo a " + url)
+	}
+	c.response.Header().Set(HeaderLocation, url)
+	c.response.WriteHeader(303)
+	return nil
+}
+
+// Redirige a la URL usando fmt.Sprintf para construir el path.
+//
+// Normal: 303 StatusSeeOther & header Location.
+//
+// HTMX: 200 OK "Redirigiendo a..." & header HX-Redirect.
+func (c *Context) Redirf(format string, a ...any) error {
+	if c.EsHTMX() {
+		c.response.Header().Set("HX-Redirect", fmt.Sprintf(format, a...))
+		return c.StatusOk("Redirigiendo a " + fmt.Sprintf(format, a...))
+	}
 	c.response.Header().Set(HeaderLocation, fmt.Sprintf(format, a...))
 	c.response.WriteHeader(303)
 	return nil

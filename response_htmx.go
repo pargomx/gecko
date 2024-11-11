@@ -1,7 +1,5 @@
 package gecko
 
-import "fmt"
-
 // ================================================================ //
 // ========== Request HTMX ======================================== //
 
@@ -22,16 +20,6 @@ func (c *Context) EsHTMX() bool {
 func (c *Context) RefreshHTMX() error {
 	c.response.Header().Set("HX-Refresh", "true")
 	return c.NoContent(204)
-}
-
-// Instruye al cliente para redirigir a la nueva ubicación.
-//
-// Responde un 200 OK: Redirigiendo a... y el header HX-Redirect.
-//
-// Utiliza fmt.Sprintf para construir el path.
-func (c *Context) RedirectHTMX(path string, a ...any) error {
-	c.response.Header().Set("HX-Redirect", fmt.Sprintf(path, a...))
-	return c.StatusOk("Redirigiendo a " + fmt.Sprintf(path, a...))
 }
 
 // Agrega un evento al HX-Trigger
