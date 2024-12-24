@@ -3,6 +3,7 @@ package gecko
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/pargomx/gecko/gko"
 )
@@ -28,13 +29,15 @@ func (g *Gecko) ResponderHTTPHandlerError(err error, c *Context) {
 	// Agregar contexto al error y loggearlo.
 	gkerr := gko.Err(err)
 	gkerr.Op(c.path) // Patrón de ruta registrada para ubicar handler.
+	if strings.Contains(c.path, "}") {
+		gkerr.Ctx("path", c.request.URL.Path) // Si hay parámetros en la ruta se incluyen.
+		// c.request.URL.Path     // Ruta sin query.
+		// c.request.URL.String() // Ruta con query.
+	}
 	if len(c.SesionID) > 6 {
 		gkerr.Ctx("sesion", c.SesionID[:6]) // Saber usuario sin exponer sesión.
 	}
 	gkerr.Log()
-
-	// gkerr.Op(c.request.Method + " " + c.request.URL.Path) // Ruta sin query.
-	// gkerr.Op(c.request.Method + " " + c.request.URL.String()) // Ruta con query.
 
 	// Método HEAD debe responder sin body.
 	if c.request.Method == http.MethodHead {

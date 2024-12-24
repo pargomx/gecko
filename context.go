@@ -10,7 +10,7 @@ import (
 type Context struct {
 	request  *http.Request
 	response *Response
-	path     string
+	path     string // Patrón de ruta registrado. Ej: "GET /inicio"
 	query    url.Values
 	gecko    *Gecko
 	SesionID string

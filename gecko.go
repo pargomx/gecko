@@ -44,7 +44,7 @@ func (g *Gecko) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	g.mux.ServeHTTP(w, r)
 }
 
-// Nuevo servidor escuchando en :8080.
+// Nuevo servidor gecko.
 func New() *Gecko {
 	pwd, err := os.Getwd()
 	if err != nil {
