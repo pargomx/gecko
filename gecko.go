@@ -50,7 +50,7 @@ func New() *Gecko {
 	if err != nil {
 		gko.FatalError(err)
 	}
-	return &Gecko{
+	g := &Gecko{
 		mux: http.NewServeMux(),
 
 		Filesystem: os.DirFS(pwd),
@@ -60,6 +60,16 @@ func New() *Gecko {
 		TmplBaseLayout: "base_layout",
 		TmplError:      "",
 	}
+	// NotFound handler consistente para rutas GET no registradas.
+	g.mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		g.ResponderHTTPHandlerError(gko.ErrNoEncontrado(), &Context{
+			request:  r,
+			response: NewResponse(w, g),
+			path:     "GET /{...}",
+			gecko:    g,
+		})
+	})
+	return g
 }
 
 // Inicia el servidor HTTP.
