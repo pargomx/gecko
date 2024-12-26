@@ -74,6 +74,23 @@ func Err(err error) *Error {
 // ========================================================== //
 // ========== S E T T E R S ================================= //
 
+func (e *Error) ErrInesperado() *Error   { e.tipo = tipoErrInesperado; return e }
+func (e *Error) ErrNoEncontrado() *Error { e.tipo = tipoErrNoEncontrado; return e }
+func (e *Error) ErrYaExiste() *Error     { e.tipo = tipoErrYaExiste; return e }
+func (e *Error) ErrHayHuerfanos() *Error { e.tipo = tipoErrHayHuerfanos; return e }
+func (e *Error) ErrTooManyReq() *Error   { e.tipo = tipoErrTooManyReq; return e }
+func (e *Error) ErrTooBig() *Error       { e.tipo = tipoErrTooBig; return e }
+func (e *Error) ErrTooLong() *Error      { e.tipo = tipoErrTooLong; return e }
+func (e *Error) ErrDatoIndef() *Error    { e.tipo = tipoErrDatoIndef; return e }
+func (e *Error) ErrDatoInvalido() *Error { e.tipo = tipoErrDatoInvalido; return e }
+func (e *Error) ErrNoSoportado() *Error  { e.tipo = tipoErrNoSoportado; return e }
+func (e *Error) ErrNoAutorizado() *Error { e.tipo = tipoErrNoAutorizado; return e }
+func (e *Error) ErrTimeout() *Error      { e.tipo = tipoErrTimeout; return e }
+func (e *Error) ErrNoDisponible() *Error { e.tipo = tipoErrNoDisponible; return e }
+func (e *Error) ErrNoSpaceLeft() *Error  { e.tipo = tipoErrNoSpaceLeft; return e }
+func (e *Error) ErrAlEscribir() *Error   { e.tipo = tipoErrAlEscribir; return e }
+func (e *Error) ErrAlLeer() *Error       { e.tipo = tipoErrAlLeer; return e }
+
 // Define un nuevo status setTipo para el error.
 // Subsecuentes llamadas sustituyen el código anterior.
 func (e *Error) setTipo(code int) *Error {
