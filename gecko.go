@@ -72,6 +72,25 @@ func New() *Gecko {
 	return g
 }
 
+// Nuevo router cuando se registra una ruta en "GET /".
+func NewSinRoot404() *Gecko {
+	pwd, err := os.Getwd()
+	if err != nil {
+		gko.FatalError(err)
+	}
+	g := &Gecko{
+		mux: http.NewServeMux(),
+
+		Filesystem: os.DirFS(pwd),
+
+		IPExtractor: ExtractIPFromRealIPHeader(),
+
+		TmplBaseLayout: "base_layout",
+		TmplError:      "",
+	}
+	return g
+}
+
 // Inicia el servidor HTTP.
 func (g *Gecko) IniciarEnPuerto(port int) error {
 	if port < 1 || port > 65535 {
