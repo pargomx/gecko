@@ -55,8 +55,6 @@ func New() *Gecko {
 
 		Filesystem: os.DirFS(pwd),
 
-		IPExtractor: ExtractIPFromRealIPHeader(),
-
 		TmplBaseLayout: "base_layout",
 		TmplError:      "",
 	}
@@ -82,8 +80,6 @@ func NewSinRoot404() *Gecko {
 		mux: http.NewServeMux(),
 
 		Filesystem: os.DirFS(pwd),
-
-		IPExtractor: ExtractIPFromRealIPHeader(),
 
 		TmplBaseLayout: "base_layout",
 		TmplError:      "",
