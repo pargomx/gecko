@@ -15,70 +15,70 @@ func (c *Context) FormTalCual(name string) string {
 
 // Valor del form sanitizado.
 func (c *Context) FormVal(name string) string {
-	return txtSanitizar(c.request.FormValue(name))
+	return TxtSanitizar(c.request.FormValue(name))
 }
 
 // Valor del form sanitizado en mayúsculas.
 func (c *Context) FormUpper(name string) string {
-	return txtUpper(c.request.FormValue(name))
+	return TxtUpper(c.request.FormValue(name))
 }
 
 // Valor del form sanitizado en minúsculas.
 func (c *Context) FormLower(name string) string {
-	return txtLower(c.request.FormValue(name))
+	return TxtLower(c.request.FormValue(name))
 }
 
 // Valor del form convertido a bool.
 // Retorna false a menos de que el valor sea: "on", "true", "1".
 func (c *Context) FormBool(name string) bool {
-	return txtBool(c.request.FormValue(name))
+	return TxtBool(c.request.FormValue(name))
 }
 
 // Valor del form convertido a entero.
 func (c *Context) FormIntMust(name string) (int, error) {
-	return txtInt(c.request.FormValue(name))
+	return TxtInt(c.request.FormValue(name))
 }
 
 // Valor del form convertido a entero sin verificar error (default 0).
 func (c *Context) FormInt(name string) int {
-	num, _ := txtInt(c.request.FormValue(name))
+	num, _ := TxtInt(c.request.FormValue(name))
 	return num
 }
 
 // Valor del form convertido a uint64.
 func (c *Context) FormUintMust(name string) (uint64, error) {
-	return txtUint64(c.request.FormValue(name))
+	return TxtUint64(c.request.FormValue(name))
 }
 
 // Valor del form convertido a uint64 sin verificar error (default 0).
 func (c *Context) FormUint(name string) uint64 {
-	num, _ := txtUint64(c.request.FormValue(name))
+	num, _ := TxtUint64(c.request.FormValue(name))
 	return num
 }
 
 // Valor del form convertido a centavos.
 func (c *Context) FormCentavos(name string) (int, error) {
-	return txtCentavos(c.request.FormValue(name))
+	return TxtCentavos(c.request.FormValue(name))
 }
 
 // Valor del form convertido a time.
 func (c *Context) FormTime(name string, layout string) (time.Time, error) {
-	return txtTime(c.request.FormValue(name), layout)
+	return TxtTime(c.request.FormValue(name), layout)
 }
 
 // Valor del form convertido a time, que puede estar indefinido.
 func (c *Context) FormTimeNullable(name string, layout string) (*time.Time, error) {
-	return txtTimeNullable(c.request.FormValue(name), layout)
+	return TxtTimeNullable(c.request.FormValue(name), layout)
 }
 
 // Valor del form convertido a time desde una fecha 28/08/2022 o 2022-02-13.
 func (c *Context) FormFecha(name string) (time.Time, error) {
-	return txtFecha(c.request.FormValue(name))
+	return TxtFecha(c.request.FormValue(name))
 }
 
 // Valor del path formato fecha convertido a time, que puede estar indefinido.
 func (c *Context) FormFechaNullable(name string) (*time.Time, error) {
-	return txtFechaNullable(c.FormValue(name))
+	return TxtFechaNullable(c.FormValue(name))
 }
 
 // ================================================================ //
@@ -94,7 +94,7 @@ func (c *Context) MultiFormVal(name string) []string {
 	res := []string{}
 	c.request.ParseForm()
 	for _, v := range c.request.Form[name] {
-		res = append(res, txtSanitizar(v))
+		res = append(res, TxtSanitizar(v))
 	}
 	return res
 }
@@ -104,7 +104,7 @@ func (c *Context) MultiFormUpper(name string) []string {
 	res := []string{}
 	c.request.ParseForm()
 	for _, v := range c.request.Form[name] {
-		res = append(res, txtUpper(v))
+		res = append(res, TxtUpper(v))
 	}
 	return res
 }
@@ -114,7 +114,7 @@ func (c *Context) MultiFormLower(name string) []string {
 	res := []string{}
 	c.request.ParseForm()
 	for _, v := range c.request.Form[name] {
-		res = append(res, txtLower(v))
+		res = append(res, TxtLower(v))
 	}
 	return res
 }
@@ -125,7 +125,7 @@ func (c *Context) MultiFormInt(name string) []int {
 	res := []int{}
 	c.request.ParseForm()
 	for _, v := range c.request.Form[name] {
-		n, err := txtInt(v)
+		n, err := TxtInt(v)
 		if err != nil {
 			continue
 		}
@@ -140,7 +140,7 @@ func (c *Context) MultiFormIntMust(name string) ([]int, error) {
 	res := []int{}
 	c.request.ParseForm()
 	for _, v := range c.request.Form[name] {
-		n, err := txtInt(v)
+		n, err := TxtInt(v)
 		if err != nil {
 			return nil, errors.New("el valor [" + v + "] no es un número válido para [" + name + "]")
 		}
@@ -155,7 +155,7 @@ func (c *Context) MultiFormUint(name string) []uint64 {
 	res := []uint64{}
 	c.request.ParseForm()
 	for _, v := range c.request.Form[name] {
-		n, err := txtUint64(v)
+		n, err := TxtUint64(v)
 		if err != nil {
 			continue
 		}
@@ -170,7 +170,7 @@ func (c *Context) MultiFormUintMust(name string) ([]uint64, error) {
 	res := []uint64{}
 	c.request.ParseForm()
 	for _, v := range c.request.Form[name] {
-		n, err := txtUint64(v)
+		n, err := TxtUint64(v)
 		if err != nil {
 			return nil, errors.New("el valor [" + v + "] no es un número válido para [" + name + "]")
 		}

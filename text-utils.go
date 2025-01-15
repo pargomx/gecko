@@ -11,15 +11,15 @@ import (
 // ================================================================ //
 // ========== PROCESAMIENTO ======================================= //
 
-// txtSanitizar corta los espacios extra y hace
+// TxtSanitizar corta los espacios extra y hace
 // las siguientes sustituciones de caracteres:
 //   - `<` `>` por `-`
 //   - `;` por `,`
 //   - `"` por `'`
 //
 // Se espera que ayude a mitigar algún tipo de ataque básico.
-func txtSanitizar(txt string) string {
-	txt = txtQuitarEspacios(txt)
+func TxtSanitizar(txt string) string {
+	txt = TxtQuitarEspacios(txt)
 	txt = strings.ReplaceAll(txt, ">", "-")
 	txt = strings.ReplaceAll(txt, "<", "-")
 	txt = strings.ReplaceAll(txt, ";", ",")
@@ -30,36 +30,36 @@ func txtSanitizar(txt string) string {
 // Remueve todos los espacios al inicio, al final y dobles.
 // También sustituye los saltos de línea y tabuladores por
 // espacios simples.
-func txtQuitarEspacios(txt string) string {
+func TxtQuitarEspacios(txt string) string {
 	return strings.TrimSpace(regexp.MustCompile(`\s+`).ReplaceAllString(txt, " "))
 }
 
 // Retorna el valor sanitizado en mayúsculas.
-func txtUpper(txt string) string {
-	return strings.ToUpper(txtSanitizar(txt))
+func TxtUpper(txt string) string {
+	return strings.ToUpper(TxtSanitizar(txt))
 }
 
 // Retorna el valor sanitizado en minúsculas.
-func txtLower(txt string) string {
-	return strings.ToLower(txtSanitizar(txt))
+func TxtLower(txt string) string {
+	return strings.ToLower(TxtSanitizar(txt))
 }
 
 // Retorna false a menos de que el valor sea:
 // "on", "true", "1".
-func txtBool(txt string) bool {
-	str := txtLower(txt)
+func TxtBool(txt string) bool {
+	str := TxtLower(txt)
 	return str == "on" || str == "true" || str == "1"
 }
 
 // Retorna el valor en tipo entero.
 // Retorna error si no es un número válido.
-func txtInt(txt string) (int, error) {
-	return strconv.Atoi(txtSanitizar(txt))
+func TxtInt(txt string) (int, error) {
+	return strconv.Atoi(TxtSanitizar(txt))
 }
 
 // Retorna el valor en tipo entero positivo de 8 bytes.
 // Valor máximo aceptado: 18446744073709551615.
-func txtUint64(txt string) (uint64, error) {
+func TxtUint64(txt string) (uint64, error) {
 	return strconv.ParseUint(txt, 10, 64)
 }
 
@@ -68,8 +68,8 @@ func txtUint64(txt string) (uint64, error) {
 //
 // El valor recibido debe estar en unidades de pesos.
 // Se puede incluir centavos pero deben estar como decimales.
-func txtCentavos(txt string) (int, error) {
-	str := txtSanitizar(txt)
+func TxtCentavos(txt string) (int, error) {
+	str := TxtSanitizar(txt)
 	str = strings.ReplaceAll(str, " ", "")
 	str = strings.ReplaceAll(str, ",", "")
 	str = strings.TrimLeft(str, "$")
@@ -116,8 +116,8 @@ func txtCentavos(txt string) (int, error) {
 // la fecha guardada sea un día anterior (6h) al esperado.
 //
 // Por ejemplo: key="fecha_inicio" layout="2006-01-02".
-func txtTime(txt string, layout string) (time.Time, error) {
-	txt = txtSanitizar(txt)
+func TxtTime(txt string, layout string) (time.Time, error) {
+	txt = TxtSanitizar(txt)
 	if txt == "" {
 		return time.Time{}, errors.New("valor indefinido")
 	}
@@ -145,8 +145,8 @@ func txtTime(txt string, layout string) (time.Time, error) {
 // la fecha guardada sea un día anterior (6h) al esperado.
 //
 // Por ejemplo: key="fecha_inicio" layout="2006-01-02".
-func txtTimeNullable(txt, layout string) (*time.Time, error) {
-	txt = txtSanitizar(txt)
+func TxtTimeNullable(txt, layout string) (*time.Time, error) {
+	txt = TxtSanitizar(txt)
 	if txt == "" {
 		return nil, nil
 	}
@@ -175,8 +175,8 @@ func txtTimeNullable(txt, layout string) (*time.Time, error) {
 //
 // Por ejemplo: key="fecha_inicio" layout="2006-01-02".
 // Acepta fechas así: "2006-01-02" "2006/01/02" "28-01-2006" "28/01/2006".
-func txtFecha(txt string) (time.Time, error) {
-	txt = txtSanitizar(txt)
+func TxtFecha(txt string) (time.Time, error) {
+	txt = TxtSanitizar(txt)
 	txt = strings.ReplaceAll(txt, " ", "") // Quitar espacios
 	if txt == "" {
 		return time.Time{}, errors.New("valor indefinido")
@@ -213,8 +213,8 @@ func txtFecha(txt string) (time.Time, error) {
 // Por ejemplo: key="fecha_inicio" layout="2006-01-02".
 //
 // Acepta fechas así: "2006-01-02" "2006/01/02" "28-01-2006" "28/01/2006".
-func txtFechaNullable(txt string) (*time.Time, error) {
-	txt = txtSanitizar(txt)
+func TxtFechaNullable(txt string) (*time.Time, error) {
+	txt = TxtSanitizar(txt)
 	txt = strings.ReplaceAll(txt, " ", "") // Quitar espacios
 	if txt == "" {
 		return nil, nil

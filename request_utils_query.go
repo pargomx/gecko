@@ -15,70 +15,70 @@ func (c *Context) QueryTalCual(name string) string {
 
 // Valor del query sanitizado.
 func (c *Context) QueryVal(name string) string {
-	return txtSanitizar(c.QueryParam(name))
+	return TxtSanitizar(c.QueryParam(name))
 }
 
 // Valor del query sanitizado en mayúsculas.
 func (c *Context) QueryUpper(name string) string {
-	return txtUpper(c.QueryParam(name))
+	return TxtUpper(c.QueryParam(name))
 }
 
 // Valor del query sanitizado en minúsculas.
 func (c *Context) QueryLower(name string) string {
-	return txtLower(c.QueryParam(name))
+	return TxtLower(c.QueryParam(name))
 }
 
 // Valor del query convertido a bool.
 // Retorna false a menos de que el valor sea: "on", "true", "1".
 func (c *Context) QueryBool(name string) bool {
-	return txtBool(c.QueryParam(name))
+	return TxtBool(c.QueryParam(name))
 }
 
 // Valor del query convertido a entero.
 func (c *Context) QueryIntMust(name string) (int, error) {
-	return txtInt(c.QueryParam(name))
+	return TxtInt(c.QueryParam(name))
 }
 
 // Valor del query convertido a entero sin verificar error (default 0).
 func (c *Context) QueryInt(name string) int {
-	num, _ := txtInt(c.QueryParam(name))
+	num, _ := TxtInt(c.QueryParam(name))
 	return num
 }
 
 // Valor del query convertido a uint64.
 func (c *Context) QueryUintMust(name string) (uint64, error) {
-	return txtUint64(c.QueryParam(name))
+	return TxtUint64(c.QueryParam(name))
 }
 
 // Valor del query convertido a uint64 sin verificar error (default 0).
 func (c *Context) QueryUint(name string) uint64 {
-	num, _ := txtUint64(c.QueryParam(name))
+	num, _ := TxtUint64(c.QueryParam(name))
 	return num
 }
 
 // Valor del query convertido a centavos.
 func (c *Context) QueryCentavos(name string) (int, error) {
-	return txtCentavos(c.QueryParam(name))
+	return TxtCentavos(c.QueryParam(name))
 }
 
 // Valor del query convertido a time.
 func (c *Context) QueryTime(name string, layout string) (time.Time, error) {
-	return txtTime(c.QueryParam(name), layout)
+	return TxtTime(c.QueryParam(name), layout)
 }
 
 // Valor del query convertido a time, que puede estar indefinido.
 func (c *Context) QueryTimeNullable(name string, layout string) (*time.Time, error) {
-	return txtTimeNullable(c.QueryParam(name), layout)
+	return TxtTimeNullable(c.QueryParam(name), layout)
 }
 
 // Valor del query convertido a time desde una fecha 28/08/2022 o 2022-02-13.
 func (c *Context) QueryFecha(name string, layout string) (time.Time, error) {
-	return txtFecha(c.QueryParam(name))
+	return TxtFecha(c.QueryParam(name))
 }
 
 // Valor del path formato fecha convertido a time, que puede estar indefinido.
 func (c *Context) QueryFechaNullable(name string) (*time.Time, error) {
-	return txtFechaNullable(c.QueryParam(name))
+	return TxtFechaNullable(c.QueryParam(name))
 }
 
 // ================================================================ //
@@ -95,7 +95,7 @@ func (c *Context) QueryValues(name string) []string {
 func (c *Context) MultiQueryVal(name string) []string {
 	res := []string{}
 	for _, v := range c.QueryValues(name) {
-		res = append(res, txtSanitizar(v))
+		res = append(res, TxtSanitizar(v))
 	}
 	return res
 }
@@ -104,7 +104,7 @@ func (c *Context) MultiQueryVal(name string) []string {
 func (c *Context) MultiQueryUpper(name string) []string {
 	res := []string{}
 	for _, v := range c.QueryValues(name) {
-		res = append(res, txtUpper(v))
+		res = append(res, TxtUpper(v))
 	}
 	return res
 }
@@ -113,7 +113,7 @@ func (c *Context) MultiQueryUpper(name string) []string {
 func (c *Context) MultiQueryLower(name string) []string {
 	res := []string{}
 	for _, v := range c.QueryValues(name) {
-		res = append(res, txtLower(v))
+		res = append(res, TxtLower(v))
 	}
 	return res
 }
@@ -123,7 +123,7 @@ func (c *Context) MultiQueryLower(name string) []string {
 func (c *Context) MultiQueryInt(name string) []int {
 	res := []int{}
 	for _, v := range c.QueryValues(name) {
-		n, err := txtInt(v)
+		n, err := TxtInt(v)
 		if err != nil {
 			continue
 		}
@@ -137,7 +137,7 @@ func (c *Context) MultiQueryInt(name string) []int {
 func (c *Context) MultiQueryIntMust(name string) ([]int, error) {
 	res := []int{}
 	for _, v := range c.QueryValues(name) {
-		n, err := txtInt(v)
+		n, err := TxtInt(v)
 		if err != nil {
 			return nil, errors.New("el valor [" + v + "] no es un número válido para [" + name + "]")
 		}
@@ -151,7 +151,7 @@ func (c *Context) MultiQueryIntMust(name string) ([]int, error) {
 func (c *Context) MultiQueryUint(name string) []uint64 {
 	res := []uint64{}
 	for _, v := range c.QueryValues(name) {
-		n, err := txtUint64(v)
+		n, err := TxtUint64(v)
 		if err != nil {
 			continue
 		}
@@ -165,7 +165,7 @@ func (c *Context) MultiQueryUint(name string) []uint64 {
 func (c *Context) MultiQueryUintMust(name string) ([]uint64, error) {
 	res := []uint64{}
 	for _, v := range c.QueryValues(name) {
-		n, err := txtUint64(v)
+		n, err := TxtUint64(v)
 		if err != nil {
 			return nil, errors.New("el valor [" + v + "] no es un número válido para [" + name + "]")
 		}
