@@ -28,6 +28,7 @@ type Gecko struct {
 	mux         *http.ServeMux
 	IPExtractor IPExtractor
 	Renderer    Renderer
+	HTTPLogger  HTTPLogger
 
 	Filesystem fs.FS // Utilizado por los file handlers.
 

@@ -3,6 +3,7 @@ package gecko
 import (
 	"net/http"
 	"net/url"
+	"time"
 )
 
 // Representa a la solicitud HTTP actual
@@ -15,6 +16,7 @@ type Context struct {
 	gecko    *Gecko
 	SesionID string
 	Sesion   any
+	time     time.Time // Momento en el que se comenzó a procesar la solicitud, utilizado para el log http.
 }
 
 func (c *Context) Request() *http.Request {
@@ -23,4 +25,8 @@ func (c *Context) Request() *http.Request {
 
 func (c *Context) Response() *Response {
 	return c.response
+}
+
+func (c *Context) Time() time.Time {
+	return c.time
 }

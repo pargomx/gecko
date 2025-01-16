@@ -3,6 +3,7 @@ package gecko
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/pargomx/gecko/gko"
 )
@@ -36,17 +37,19 @@ type HandlerFunc func(c *Context) error
 func (g *Gecko) registrarRuta(método string, ruta string, handler HandlerFunc) {
 	patrón := toMuxPattern(método, ruta)
 	g.mux.HandleFunc(patrón, func(w http.ResponseWriter, r *http.Request) {
-		// Preparar contexto.
 		c := &Context{
 			request:  r,
 			response: NewResponse(w, g),
 			path:     patrón,
 			gecko:    g,
+			time:     time.Now(),
 		}
-		// Ejecutar handler y manejar error.
 		err := handler(c)
 		if err != nil {
 			g.ResponderHTTPHandlerError(err, c)
+		}
+		if g.HTTPLogger != nil {
+			g.logHTTP(c, err)
 		}
 	})
 	// fmt.Println("RUTA:", patrón)

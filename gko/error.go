@@ -61,7 +61,7 @@ func Err(err error) *Error {
 	if err == nil {
 		return &Error{}
 	}
-	// Si ya es un error gecko, retornarlo.
+	// Si ya es un error gecko, solo convertirlo.
 	if errGk, ok := err.(*Error); ok {
 		return errGk
 	}

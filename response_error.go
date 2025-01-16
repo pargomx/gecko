@@ -26,8 +26,8 @@ func (g *Gecko) ResponderHTTPHandlerError(err error, c *Context) {
 		return
 	}
 
-	// Agregar contexto al error y loggearlo.
-	gkerr := gko.Err(err)
+	// Copiar error y agregar contexto http para loggearlo sin agregar info redundante a log http.
+	gkerr := *gko.Err(err)
 	gkerr.Op(c.path) // Patrón de ruta registrada para ubicar handler.
 	if strings.Contains(c.path, "}") {
 		gkerr.Ctx("path", c.request.URL.Path) // Si hay parámetros en la ruta se incluyen.
@@ -35,7 +35,7 @@ func (g *Gecko) ResponderHTTPHandlerError(err error, c *Context) {
 		// c.request.URL.String() // Ruta con query.
 	}
 	if len(c.SesionID) > 6 {
-		gkerr.Ctx("sesion", c.SesionID[:6]) // Saber usuario sin exponer sesión.
+		gkerr.Ctx("sesion", c.SesionID[:6]) // Conocer usuario sin exponer sesión.
 	}
 	gkerr.Log()
 

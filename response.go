@@ -6,20 +6,20 @@ import (
 	"net/http"
 )
 
-type (
-	// Response wraps an http.ResponseWriter and implements its interface to be used
-	// by an HTTP handler to construct an HTTP response.
-	// See: https://golang.org/pkg/net/http/#ResponseWriter
-	Response struct {
-		gecko       *Gecko
-		beforeFuncs []func()
-		afterFuncs  []func()
-		Writer      http.ResponseWriter
-		Status      int
-		Size        int64
-		Committed   bool
-	}
-)
+// Fuente original: https://github.com/labstack/echo/blob/master/response.go
+
+// Response wraps an http.ResponseWriter and implements its interface to be used
+// by an HTTP handler to construct an HTTP response.
+// See: https://golang.org/pkg/net/http/#ResponseWriter
+type Response struct {
+	gecko       *Gecko
+	beforeFuncs []func()
+	afterFuncs  []func()
+	Writer      http.ResponseWriter
+	Status      int
+	Size        uint64
+	Committed   bool
+}
 
 // NewResponse creates a new instance of Response.
 func NewResponse(w http.ResponseWriter, g *Gecko) (r *Response) {
@@ -76,7 +76,7 @@ func (r *Response) Write(b []byte) (n int, err error) {
 		r.WriteHeader(r.Status)
 	}
 	n, err = r.Writer.Write(b)
-	r.Size += int64(n)
+	r.Size += uint64(n)
 	for _, fn := range r.afterFuncs {
 		fn()
 	}
