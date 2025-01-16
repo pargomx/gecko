@@ -16,20 +16,20 @@ type LogEntry struct {
 	Method       string        // `loghttp.method`  Verbo HTTP de la solicitud
 	Ruta         string        // `loghttp.ruta`  Patrón del router sobre la que se enrutó
 	URI          string        // `loghttp.uri`  Path con query params
-	Htmx         bool          // `loghttp.htmx`  Es una solicitud HTMX
+	Htmx         bool          `json:"Htmx,omitempty"` // `loghttp.htmx`  Es una solicitud HTMX
 	Status       int           // `loghttp.status`  Código HTTP de la respuesta
 	Latency      time.Duration // `loghttp.latency`  Tiempo de procesamiento y envío de la respuesta
 	BytesIn      uint64        // `loghttp.bytes_in`  Request "Content-Length"
 	BytesOut     uint64        // `loghttp.bytes_out`  Bytes escritos como respuesta
-	Error        error         // `loghttp.error`  En caso de haber error
+	Error        string        `json:"Error,omitempty"` // `loghttp.error`  En caso de haber error
 	RemoteIP     string        // `loghttp.remote_ip`
-	Sesion       string        // `loghttp.sesion`
-	UserAgent    string        // `loghttp.user_agent`
-	Referer      string        // `loghttp.referer`
-	HxCurrentURL string        // `loghttp.hx_current_url`
-	HxTarget     string        // `loghttp.hx_target`
-	HxTrigger    string        // `loghttp.hx_trigger`
-	HxBoosted    bool          // `loghttp.hx_boosted`
+	Sesion       string        `json:"Sesion,omitempty"`       // `loghttp.sesion`
+	UserAgent    string        `json:"UserAgent,omitempty"`    // `loghttp.user_agent`
+	Referer      string        `json:"Referer,omitempty"`      // `loghttp.referer`
+	HxCurrentURL string        `json:"HxCurrentURL,omitempty"` // `loghttp.hx_current_url`
+	HxTarget     string        `json:"HxTarget,omitempty"`     // `loghttp.hx_target`
+	HxTrigger    string        `json:"HxTrigger,omitempty"`    // `loghttp.hx_trigger`
+	HxBoosted    bool          `json:"HxBoosted,omitempty"`    // `loghttp.hx_boosted`
 }
 
 type HTTPLogger interface {
@@ -48,7 +48,6 @@ func (g *Gecko) logHTTP(c *Context, err error) {
 		Method:       c.request.Method,
 		Ruta:         c.path,
 		URI:          c.request.RequestURI,
-		Error:        err,
 		Latency:      time.Since(c.time),
 		BytesIn:      bytesIn,
 		BytesOut:     c.response.Size,
@@ -58,6 +57,9 @@ func (g *Gecko) logHTTP(c *Context, err error) {
 		HxTarget:     c.request.Header.Get("Hx-Target"),
 		HxTrigger:    c.request.Header.Get("Hx-Trigger"),
 		HxBoosted:    c.request.Header.Get("Hx-Boosted") == "true",
+	}
+	if err != nil {
+		logEnt.Error = err.Error()
 	}
 	if len(c.SesionID) > 6 {
 		logEnt.Sesion = c.SesionID[:6] // Conocer usuario sin exponer sesión.
