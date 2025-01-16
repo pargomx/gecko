@@ -111,13 +111,19 @@ func (e *Error) Error() string {
 		msg += " " + e.operación
 	}
 	if e.mensaje != "" {
-		msg += ": " + e.mensaje + "."
+		if msg != "" {
+			msg += ": "
+		}
+		msg += e.mensaje + "."
 	}
 	if e.valores != "" {
 		msg += " {" + e.valores + "}"
 	}
 	if e.texto != "" {
-		msg += " " + e.texto
+		if msg != "" {
+			msg += " "
+		}
+		msg += e.texto
 	}
 	return msg
 }
