@@ -2,8 +2,10 @@ package loggerfile
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
+	"path"
 	"sync"
 	"time"
 )
@@ -37,6 +39,20 @@ type Logger struct {
 // especificada para no saturar de operaciones IO cuando haya muchas
 // solicitudes en poco tiempo.
 func NewLogger(filePath string, flushFreq time.Duration) (*Logger, error) {
+
+	// Crear directorio si no existe.
+	_, err := os.Stat(path.Dir(filePath))
+	if errors.Is(err, os.ErrNotExist) {
+		fmt.Println("Creado directorio para", path.Dir(filePath))
+		err := os.MkdirAll(path.Dir(filePath), 0755)
+		if err != nil {
+			return nil, err
+		}
+	} else if err != nil {
+		return nil, err
+	}
+
+	// Abrir o crear archivo.
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0640)
 	if err != nil {
 		return nil, err

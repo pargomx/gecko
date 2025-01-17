@@ -6,12 +6,24 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/pargomx/gecko"
 	"github.com/pargomx/gecko/gko"
 	"github.com/pargomx/gecko/logsqlite"
 )
+
+func makeLogEntry(host, req string) gecko.LogEntry {
+	return gecko.LogEntry{
+		Timestamp: time.Now(),
+		Host:      host,
+		Ruta:      "/fake/" + host + "/" + req,
+		Status:    200,
+		BytesIn:   45,
+		BytesOut:  1024,
+	}
+}
 
 func main() {
 
@@ -26,11 +38,66 @@ func main() {
 	g := gecko.New()
 
 	// HTTP Logger
-	logger, err := logsqlite.NewLogger("http_log.sql", time.Second*3)
+	logger0, err := logsqlite.NewLogger("demo/httplog.sql", time.Second*3)
 	if err != nil {
 		gko.FatalError(err)
 	}
-	g.HTTPLogger = logger
+	g.HTTPLogger = logger0
+	defer logger0.Close()
+
+	logger1, err := logsqlite.NewLogger("demo/httplog.sql", time.Second*3)
+	if err != nil {
+		gko.FatalError(err)
+	}
+	logger2, err := logsqlite.NewLogger("demo/httplog.sql", time.Second*3)
+	if err != nil {
+		gko.FatalError(err)
+	}
+	logger3, err := logsqlite.NewLogger("demo/httplog.sql", time.Second*3)
+	if err != nil {
+		gko.FatalError(err)
+	}
+
+	gko.LogInfo("Logging")
+	for i := 0; i < 100000; i++ {
+		err = logger0.InsertLogEntry(makeLogEntry("logger0", "1/"+strconv.Itoa(i)))
+		if err != nil {
+			gko.LogError(err)
+		}
+		err = logger0.InsertLogEntry(makeLogEntry("logger0", "2/"+strconv.Itoa(i)))
+		if err != nil {
+			gko.LogError(err)
+		}
+		err = logger1.InsertLogEntry(makeLogEntry("logger1", "3/"+strconv.Itoa(i)))
+		if err != nil {
+			gko.LogError(err)
+		}
+		err = logger1.InsertLogEntry(makeLogEntry("logger1", "3/"+strconv.Itoa(i)))
+		if err != nil {
+			gko.LogError(err)
+		}
+		err = logger2.InsertLogEntry(makeLogEntry("logger2", "4/"+strconv.Itoa(i)))
+		if err != nil {
+			gko.LogError(err)
+		}
+		err = logger3.InsertLogEntry(makeLogEntry("logger3", "5/"+strconv.Itoa(i)))
+		if err != nil {
+			gko.LogError(err)
+		}
+		err = logger2.InsertLogEntry(makeLogEntry("logger2", "6/"+strconv.Itoa(i)))
+		if err != nil {
+			gko.LogError(err)
+		}
+		err = logger1.InsertLogEntry(makeLogEntry("logger1", "7/"+strconv.Itoa(i)))
+		if err != nil {
+			gko.LogError(err)
+		}
+		err = logger0.InsertLogEntry(makeLogEntry("logger0", "8/"+strconv.Itoa(i)))
+		if err != nil {
+			gko.LogError(err)
+		}
+	}
+	gko.LogInfo("Logged")
 
 	g.GET("/", func(c *gecko.Context) error {
 		return c.StringOk(mensaje + "\n")

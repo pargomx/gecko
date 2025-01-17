@@ -18,7 +18,7 @@ type LogEntry struct {
 	URI          string        // `loghttp.uri`  Path con query params
 	Htmx         bool          `json:"Htmx,omitempty"` // `loghttp.htmx`  Es una solicitud HTMX
 	Status       int           // `loghttp.status`  Código HTTP de la respuesta
-	Latency      time.Duration // `loghttp.latency`  Tiempo de procesamiento y envío de la respuesta
+	Latency      time.Duration // `loghttp.latency`  Tiempo de procesamiento y envío de la respuesta en nanosegundos.
 	BytesIn      uint64        // `loghttp.bytes_in`  Request "Content-Length"
 	BytesOut     uint64        // `loghttp.bytes_out`  Bytes escritos como respuesta
 	Error        string        `json:"Error,omitempty"` // `loghttp.error`  En caso de haber error
@@ -64,10 +64,12 @@ func (g *Gecko) logHTTP(c *Context, err error) {
 	if len(c.SesionID) > 6 {
 		logEnt.Sesion = c.SesionID[:6] // Conocer usuario sin exponer sesión.
 	}
-	logErr := g.HTTPLogger.InsertLogEntry(logEnt)
-	if logErr != nil {
-		gko.Err(logErr).Op("LogHTTP").Log()
-	}
+	go func() {
+		logErr := g.HTTPLogger.InsertLogEntry(logEnt)
+		if logErr != nil {
+			gko.Err(logErr).Op("LogHTTP").Log()
+		}
+	}()
 }
 
 // ================================================================ //
