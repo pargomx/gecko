@@ -8,6 +8,8 @@ import (
 	"path"
 	"sync"
 	"time"
+
+	"github.com/pargomx/gecko/gko"
 )
 
 // Logger struct to handle logging
@@ -26,6 +28,7 @@ import (
 //		time.Sleep(10 * time.Second) // Give some time for logs to process and flush
 //	 }
 type Logger struct {
+	filepath  string
 	file      *os.File
 	writer    *bufio.Writer
 	mu        sync.Mutex
@@ -39,6 +42,7 @@ type Logger struct {
 // especificada para no saturar de operaciones IO cuando haya muchas
 // solicitudes en poco tiempo.
 func NewLogger(filePath string, flushFreq time.Duration) (*Logger, error) {
+	op := gko.Op("loggerfile.NewLogger").Ctx("file", filePath).Ctx("flushFreq", flushFreq)
 
 	// Crear directorio si no existe.
 	_, err := os.Stat(path.Dir(filePath))
@@ -46,19 +50,20 @@ func NewLogger(filePath string, flushFreq time.Duration) (*Logger, error) {
 		fmt.Println("Creado directorio para", path.Dir(filePath))
 		err := os.MkdirAll(path.Dir(filePath), 0755)
 		if err != nil {
-			return nil, err
+			return nil, op.Err(err)
 		}
 	} else if err != nil {
-		return nil, err
+		return nil, op.Err(err)
 	}
 
 	// Abrir o crear archivo.
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0640)
 	if err != nil {
-		return nil, err
+		return nil, op.Err(err)
 	}
 
 	logger := &Logger{
+		filepath:  filePath,
 		file:      file,
 		writer:    bufio.NewWriter(file),
 		ch:        make(chan string, 100), // Buffered channel for log entries
@@ -131,15 +136,18 @@ func (l *Logger) periodicFlush() {
 	}
 }
 
-// Close closes the logger and the underlying file
-func (l *Logger) Close() error {
+// Close flushes and closes the file logger.
+func (l *Logger) Close() {
 	close(l.ch)
 	close(l.done)
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	err := l.writer.Flush()
 	if err != nil {
-		return err
+		gko.Err(err).Op("loggerfile.Close").Ctx("logger", l.filepath)
 	}
-	return l.file.Close()
+	err = l.file.Close()
+	if err != nil {
+		gko.Err(err).Op("loggerfile.Close").Ctx("logger", l.filepath)
+	}
 }

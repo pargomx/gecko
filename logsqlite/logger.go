@@ -58,38 +58,39 @@ var pragmaConfig = "?_pragma=foreign_keys(0)&_busy_timeout=1000"
 // especificada para no saturar de operaciones IO cuando haya muchas
 // solicitudes en poco tiempo.
 func NewLogger(dbPath string, flushFreq time.Duration) (*logger, error) {
+	op := gko.Op("logsqlite.NewLogger").Ctx("db", dbPath).Ctx("flushFreq", flushFreq)
 	if dbPath == "" {
-		return nil, errors.New("log db path no especificada")
+		return nil, op.ErrDatoIndef().Str("db no especificada")
 	}
 
 	// Crear directorio si no existe.
 	_, err := os.Stat(path.Dir(dbPath))
 	if errors.Is(err, os.ErrNotExist) {
 		fmt.Println("Creado directorio para", path.Dir(dbPath))
-		err := os.MkdirAll(path.Dir(dbPath), 0755)
+		err := os.MkdirAll(path.Dir(dbPath), 0750)
 		if err != nil {
-			return nil, err
+			return nil, op.Err(err)
 		}
 	} else if err != nil {
-		return nil, err
+		return nil, op.Err(err)
 	}
 
 	// Verificar o crear archivo para base de datos.
 	_, err = os.Stat(dbPath)
 	if errors.Is(err, os.ErrNotExist) {
 		fmt.Println("Creado archivo para base de datos", dbPath)
-		err = os.WriteFile(dbPath, []byte{}, 0664)
+		err = os.WriteFile(dbPath, []byte{}, 0640)
 		if err != nil {
-			return nil, err
+			return nil, op.Err(err)
 		}
 	} else if err != nil {
-		return nil, err
+		return nil, op.Err(err)
 	}
 
 	// Abrir base de datos.
 	db, err := sql.Open("sqlite", dbPath+pragmaConfig)
 	if err != nil {
-		return nil, err
+		return nil, op.Err(err)
 	}
 	// Para evitar error database locked. https://github.com/mattn/go-sqlite3/issues/274
 	db.SetMaxOpenConns(1)
@@ -97,14 +98,14 @@ func NewLogger(dbPath string, flushFreq time.Duration) (*logger, error) {
 	// Verificar o crear tabla para logs http.
 	var tblExists bool
 	err = db.QueryRow("SELECT count(name) FROM sqlite_master WHERE type='table' AND name='loghttp'").Scan(&tblExists)
+	if err != nil {
+		return nil, op.Err(err) // La DB puede no ser válida. Si la tabla está o no el count(name) es 0 o 1 sin error.
+	}
 	if !tblExists {
-		if err != nil {
-			gko.LogError(err) // TODO: ErrNoRows?
-		}
 		gko.LogEventof("Inicializando log http en sqlite")
 		_, err = db.Exec(setupSqliteDB)
 		if err != nil {
-			return nil, err
+			return nil, op.Err(err)
 		}
 	}
 
@@ -121,19 +122,21 @@ func NewLogger(dbPath string, flushFreq time.Duration) (*logger, error) {
 }
 
 // Close closes the logger and the underlying db
-func (l *logger) Close() error {
+func (l *logger) Close() {
 	l.flushBufferToDB()
-	return l.db.Close()
+	err := l.db.Close()
+	if err != nil {
+		gko.Err(err).Op("SqliteLogHTTP.Close").Log()
+	}
 }
 
 // ================================================================ //
 
 // Implementación de log http en sqlite.
-func (l *logger) InsertLogEntry(entry gecko.LogEntry) error {
+func (l *logger) SaveLog(entry gecko.LogEntry) {
 	l.mu.Lock()
 	l.entries = append(l.entries, entry)
 	l.mu.Unlock()
-	return nil
 }
 
 // Saves all entries in buffer at regular intervals.
@@ -160,7 +163,7 @@ func (l *logger) flushBufferToDB() {
 		fmt.Printf("Error begining log transaction: %v\n", err)
 	}
 	for _, entry := range l.entries {
-		err := l.insertLogEntry(tx, entry)
+		err := l.insertLogHTTP(tx, entry)
 		if err != nil {
 			fmt.Printf("Error inserting log entry: %v\n", err)
 		}
@@ -181,8 +184,8 @@ func (l *logger) flushBufferToDB() {
 }
 
 // Inserts one entry to the sqlite db.
-func (l *logger) insertLogEntry(tx *sql.Tx, entr gecko.LogEntry) error {
-	const op string = "InsertLogEntry"
+func (l *logger) insertLogHTTP(tx *sql.Tx, entr gecko.LogEntry) error {
+	const op string = "insertLogHTTP"
 	if entr.Timestamp.IsZero() {
 		return gko.ErrDatoIndef().Op(op).Msg("Timestamp sin especificar").Str("pk_indefinida")
 	}
@@ -199,7 +202,7 @@ func (l *logger) insertLogEntry(tx *sql.Tx, entr gecko.LogEntry) error {
 				time.Sleep(time.Millisecond * 123)
 				l.retryCount++
 				gko.LogWarnf("RetryHttpLogInsertSqliteBusy %v", l.retryCount)
-				return l.insertLogEntry(tx, entr)
+				return l.insertLogHTTP(tx, entr)
 			} else {
 				gko.LogWarn("too many retries in http log")
 			}

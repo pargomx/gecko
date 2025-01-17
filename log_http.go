@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-
-	"github.com/pargomx/gecko/gko"
 )
 
 // LogEntry corresponde a un elemento de la tabla 'loghttp'.
@@ -33,7 +31,8 @@ type LogEntry struct {
 }
 
 type HTTPLogger interface {
-	InsertLogEntry(entr LogEntry) error
+	SaveLog(entry LogEntry) // Persiste la entrada de log, podría usar un buffer.
+	Close()                 // Persiste buffers pendientes y cierra el logger.
 }
 
 func (g *Gecko) logHTTP(c *Context, err error) {
@@ -64,12 +63,7 @@ func (g *Gecko) logHTTP(c *Context, err error) {
 	if len(c.SesionID) > 6 {
 		logEnt.Sesion = c.SesionID[:6] // Conocer usuario sin exponer sesión.
 	}
-	go func() {
-		logErr := g.HTTPLogger.InsertLogEntry(logEnt)
-		if logErr != nil {
-			gko.Err(logErr).Op("LogHTTP").Log()
-		}
-	}()
+	go g.HTTPLogger.SaveLog(logEnt) // Async para no retener al cliente.
 }
 
 // ================================================================ //
@@ -78,7 +72,7 @@ func (g *Gecko) logHTTP(c *Context, err error) {
 type HTTPLoggerJSON struct{}
 
 // Implementación simple de log http como JSON al stdout.
-func (l *HTTPLoggerJSON) InsertLogEntry(entr LogEntry) error {
+func (l *HTTPLoggerJSON) LogRequestHTTP(entr LogEntry) error {
 	log, err := json.Marshal(entr)
 	if err != nil {
 		return err

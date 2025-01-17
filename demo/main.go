@@ -60,42 +60,15 @@ func main() {
 
 	gko.LogInfo("Logging")
 	for i := 0; i < 100000; i++ {
-		err = logger0.InsertLogEntry(makeLogEntry("logger0", "1/"+strconv.Itoa(i)))
-		if err != nil {
-			gko.LogError(err)
-		}
-		err = logger0.InsertLogEntry(makeLogEntry("logger0", "2/"+strconv.Itoa(i)))
-		if err != nil {
-			gko.LogError(err)
-		}
-		err = logger1.InsertLogEntry(makeLogEntry("logger1", "3/"+strconv.Itoa(i)))
-		if err != nil {
-			gko.LogError(err)
-		}
-		err = logger1.InsertLogEntry(makeLogEntry("logger1", "3/"+strconv.Itoa(i)))
-		if err != nil {
-			gko.LogError(err)
-		}
-		err = logger2.InsertLogEntry(makeLogEntry("logger2", "4/"+strconv.Itoa(i)))
-		if err != nil {
-			gko.LogError(err)
-		}
-		err = logger3.InsertLogEntry(makeLogEntry("logger3", "5/"+strconv.Itoa(i)))
-		if err != nil {
-			gko.LogError(err)
-		}
-		err = logger2.InsertLogEntry(makeLogEntry("logger2", "6/"+strconv.Itoa(i)))
-		if err != nil {
-			gko.LogError(err)
-		}
-		err = logger1.InsertLogEntry(makeLogEntry("logger1", "7/"+strconv.Itoa(i)))
-		if err != nil {
-			gko.LogError(err)
-		}
-		err = logger0.InsertLogEntry(makeLogEntry("logger0", "8/"+strconv.Itoa(i)))
-		if err != nil {
-			gko.LogError(err)
-		}
+		logger0.SaveLog(makeLogEntry("logger0", "1/"+strconv.Itoa(i)))
+		logger0.SaveLog(makeLogEntry("logger0", "2/"+strconv.Itoa(i)))
+		logger1.SaveLog(makeLogEntry("logger1", "3/"+strconv.Itoa(i)))
+		logger1.SaveLog(makeLogEntry("logger1", "3/"+strconv.Itoa(i)))
+		logger2.SaveLog(makeLogEntry("logger2", "4/"+strconv.Itoa(i)))
+		logger3.SaveLog(makeLogEntry("logger3", "5/"+strconv.Itoa(i)))
+		logger2.SaveLog(makeLogEntry("logger2", "6/"+strconv.Itoa(i)))
+		logger1.SaveLog(makeLogEntry("logger1", "7/"+strconv.Itoa(i)))
+		logger0.SaveLog(makeLogEntry("logger0", "8/"+strconv.Itoa(i)))
 	}
 	gko.LogInfo("Logged")
 
