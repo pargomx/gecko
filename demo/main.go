@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"io"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/pargomx/gecko"
@@ -45,32 +44,33 @@ func main() {
 	g.HTTPLogger = logger0
 	defer logger0.Close()
 
-	logger1, err := logsqlite.NewLogger("demo/httplog.sql", time.Second*3)
-	if err != nil {
-		gko.FatalError(err)
-	}
-	logger2, err := logsqlite.NewLogger("demo/httplog.sql", time.Second*3)
-	if err != nil {
-		gko.FatalError(err)
-	}
-	logger3, err := logsqlite.NewLogger("demo/httplog.sql", time.Second*3)
-	if err != nil {
-		gko.FatalError(err)
-	}
+	// logger1, err := logsqlite.NewLogger("demo/httplog.sql", time.Second*3)
+	// if err != nil {
+	// 	gko.FatalError(err)
+	// }
+	// logger2, err := logsqlite.NewLogger("demo/httplog.sql", time.Second*3)
+	// if err != nil {
+	// 	gko.FatalError(err)
+	// }
+	// logger3, err := logsqlite.NewLogger("demo/httplog.sql", time.Second*3)
+	// if err != nil {
+	// 	gko.FatalError(err)
+	// }
+	// gko.LogInfo("Logging")
+	// for i := 0; i < 100000; i++ {
+	// 	logger0.SaveLog(makeLogEntry("logger0", "1/"+strconv.Itoa(i)))
+	// 	logger0.SaveLog(makeLogEntry("logger0", "2/"+strconv.Itoa(i)))
+	// 	logger1.SaveLog(makeLogEntry("logger1", "3/"+strconv.Itoa(i)))
+	// 	logger1.SaveLog(makeLogEntry("logger1", "3/"+strconv.Itoa(i)))
+	// 	logger2.SaveLog(makeLogEntry("logger2", "4/"+strconv.Itoa(i)))
+	// 	logger3.SaveLog(makeLogEntry("logger3", "5/"+strconv.Itoa(i)))
+	// 	logger2.SaveLog(makeLogEntry("logger2", "6/"+strconv.Itoa(i)))
+	// 	logger1.SaveLog(makeLogEntry("logger1", "7/"+strconv.Itoa(i)))
+	// 	logger0.SaveLog(makeLogEntry("logger0", "8/"+strconv.Itoa(i)))
+	// }
+	// gko.LogInfo("Logged")
 
-	gko.LogInfo("Logging")
-	for i := 0; i < 100000; i++ {
-		logger0.SaveLog(makeLogEntry("logger0", "1/"+strconv.Itoa(i)))
-		logger0.SaveLog(makeLogEntry("logger0", "2/"+strconv.Itoa(i)))
-		logger1.SaveLog(makeLogEntry("logger1", "3/"+strconv.Itoa(i)))
-		logger1.SaveLog(makeLogEntry("logger1", "3/"+strconv.Itoa(i)))
-		logger2.SaveLog(makeLogEntry("logger2", "4/"+strconv.Itoa(i)))
-		logger3.SaveLog(makeLogEntry("logger3", "5/"+strconv.Itoa(i)))
-		logger2.SaveLog(makeLogEntry("logger2", "6/"+strconv.Itoa(i)))
-		logger1.SaveLog(makeLogEntry("logger1", "7/"+strconv.Itoa(i)))
-		logger0.SaveLog(makeLogEntry("logger0", "8/"+strconv.Itoa(i)))
-	}
-	gko.LogInfo("Logged")
+	// g.StaticSub("/", "demo")
 
 	g.GET("/", func(c *gecko.Context) error {
 		return c.StringOk(mensaje + "\n")

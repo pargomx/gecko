@@ -46,13 +46,31 @@ func (g *Gecko) registrarRuta(método string, ruta string, handler HandlerFunc) 
 		}
 		err := handler(c)
 		if err != nil {
-			g.ResponderHTTPHandlerError(err, c)
+			g.responderErrorHTTP(c, err)
 		}
 		if g.HTTPLogger != nil {
 			g.logHTTP(c, err)
 		}
 	})
 	// fmt.Println("RUTA:", patrón)
+}
+
+// NotFound handler para rutas GET no registradas evitando usar el de *http.ServeMux.
+func (g *Gecko) registrarNotFoundHandler() {
+	g.mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		c := &Context{
+			request:  r,
+			response: NewResponse(w, g),
+			path:     "GET /{...}",
+			gecko:    g,
+			time:     time.Now(),
+		}
+		err := gko.ErrNoEncontrado()
+		g.responderErrorHTTP(c, err)
+		if g.HTTPLogger != nil {
+			g.logHTTP(c, err)
+		}
+	})
 }
 
 // Necesario para validar patrón de ruta con método y las reglas de gecko.

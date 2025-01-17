@@ -12,7 +12,7 @@ import (
 //
 // NOTA: el error se ignora cuando se genera en un middleware después
 // de que un handler ya respondió algo al cliente sin error.
-func (g *Gecko) ResponderHTTPHandlerError(err error, c *Context) {
+func (g *Gecko) responderErrorHTTP(c *Context, err error) {
 	if err == nil {
 		gko.LogAlertf("gko.ErrHandler: err nil: %s", c.path)
 		return
@@ -76,7 +76,7 @@ func (g *Gecko) ResponderHTTPHandlerError(err error, c *Context) {
 
 	// Default: responder con texto.
 	err = c.HTML(gkerr.GetCodigoHTTP(), fmt.Sprintf(
-		`<html><head><title>Error %d</title></head><body style="background-color:black;color:white;"><h2>%s</h2><a href="/" style="color:aqua;">Ir a inicio</a></body></html>`,
+		`<html><head><title>Error %d</title></head><body style="background-color:black;color:white;"><h2>%s</h2><a href="/" style="color:aqua;">Ir a inicio</a></body></html>`+"\n",
 		gkerr.GetCodigoHTTP(), gkerr.GetMensaje(),
 	))
 	if err != nil {
