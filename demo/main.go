@@ -6,9 +6,11 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/pargomx/gecko"
 	"github.com/pargomx/gecko/gko"
+	"github.com/pargomx/gecko/logsqlite"
 )
 
 func main() {
@@ -22,6 +24,13 @@ func main() {
 
 	fmt.Println("Preparando servidor")
 	g := gecko.New()
+
+	// HTTP Logger
+	logger, err := logsqlite.NewLogger("http_log.sql", time.Second*3)
+	if err != nil {
+		gko.FatalError(err)
+	}
+	g.HTTPLogger = logger
 
 	g.GET("/", func(c *gecko.Context) error {
 		return c.StringOk(mensaje + "\n")
