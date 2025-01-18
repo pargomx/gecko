@@ -3,7 +3,6 @@ package logsqlite
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -54,7 +53,7 @@ CREATE TABLE loghttp (
 var pragmaConfig = "?_pragma=foreign_keys(0)&_busy_timeout=1000"
 
 // NewLogger instancia un nuevo logger que escribirá sus entradas
-// en un archivo de texto. Escribirá al archivo con la frecuencia
+// en una base de datos sqlite. Escribirá al archivo con la frecuencia
 // especificada para no saturar de operaciones IO cuando haya muchas
 // solicitudes en poco tiempo.
 func NewLogger(dbPath string, flushFreq time.Duration) (*logger, error) {
@@ -69,7 +68,7 @@ func NewLogger(dbPath string, flushFreq time.Duration) (*logger, error) {
 	// Crear directorio si no existe.
 	_, err := os.Stat(path.Dir(dbPath))
 	if errors.Is(err, os.ErrNotExist) {
-		fmt.Println("Creado directorio para", path.Dir(dbPath))
+		gko.LogInfof("Creado directorio %s", path.Dir(dbPath))
 		err := os.MkdirAll(path.Dir(dbPath), 0750)
 		if err != nil {
 			return nil, op.Err(err)
@@ -81,7 +80,7 @@ func NewLogger(dbPath string, flushFreq time.Duration) (*logger, error) {
 	// Verificar o crear archivo para base de datos.
 	_, err = os.Stat(dbPath)
 	if errors.Is(err, os.ErrNotExist) {
-		fmt.Println("Creado archivo para base de datos", dbPath)
+		gko.LogInfof("Creado archivo para base de datos %s", dbPath)
 		err = os.WriteFile(dbPath, []byte{}, 0640)
 		if err != nil {
 			return nil, op.Err(err)
@@ -156,21 +155,22 @@ func (l *logger) flushBufferToDB() {
 	if len(l.entries) == 0 {
 		return
 	}
+	const op = "logsqlite.flush"
 	// gko.LogInfof("Flushing len=%d cap=%d", len(l.entries), cap(l.entries))
 	l.mu.Lock()
 	tx, err := l.db.Begin() // Varios inserts en una sola transacción es más eficiente.
 	if err != nil {
-		fmt.Printf("Error begining log transaction: %v\n", err)
+		gko.Err(err).Op(op).Str("Error begining log transaction")
 	}
 	for _, entry := range l.entries {
 		err := l.insertLogHTTP(tx, entry)
 		if err != nil {
-			fmt.Printf("Error inserting log entry: %v\n", err)
+			gko.Err(err).Op(op).Str("Error inserting log entry")
 		}
 	}
 	err = tx.Commit()
 	if err != nil {
-		fmt.Printf("Error commiting log transaction: %v\n", err)
+		gko.Err(err).Op(op).Str("Error commiting log transaction")
 	}
 	// Only dispose of the underlying array if it's too big
 	if cap(l.entries) > 128 {

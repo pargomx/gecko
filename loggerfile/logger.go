@@ -3,7 +3,6 @@ package loggerfile
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"os"
 	"path"
 	"sync"
@@ -12,22 +11,7 @@ import (
 	"github.com/pargomx/gecko/gko"
 )
 
-// Logger struct to handle logging
-//
-//	func Example() {
-//		logger, err := NewLogger("app.log", 5*time.Second)
-//		if err != nil {
-//			fmt.Printf("Error initializing logger: %v\n", err)
-//			return
-//		}
-//		defer logger.Close()
-//		logger.LogAsync("This is a log entry")
-//		logger.LogSync("Another log entry 1")
-//		logger.LogSync("Another log entry 2")
-//		logger.LogSync("Another log entry 3")
-//		time.Sleep(10 * time.Second) // Give some time for logs to process and flush
-//	 }
-type Logger struct {
+type logger struct {
 	filepath  string
 	file      *os.File
 	writer    *bufio.Writer
@@ -41,8 +25,8 @@ type Logger struct {
 // en un archivo de texto. Escribirá al archivo con la frecuencia
 // especificada para no saturar de operaciones IO cuando haya muchas
 // solicitudes en poco tiempo.
-func NewLogger(filePath string, flushFreq time.Duration) (*Logger, error) {
-	op := gko.Op("loggerfile.NewLogger").Ctx("file", filePath).Ctx("flushFreq", flushFreq)
+func NewLogger(filePath string, flushFreq time.Duration) (*logger, error) {
+	op := gko.Op("logfile.NewLogger").Ctx("file", filePath).Ctx("flushFreq", flushFreq)
 	if filePath == "" {
 		return nil, op.ErrDatoIndef().Str("log file path undefined")
 	}
@@ -53,7 +37,7 @@ func NewLogger(filePath string, flushFreq time.Duration) (*Logger, error) {
 	// Crear directorio si no existe.
 	_, err := os.Stat(path.Dir(filePath))
 	if errors.Is(err, os.ErrNotExist) {
-		fmt.Println("Creado directorio para", path.Dir(filePath))
+		gko.LogInfof("Creado directorio %s", path.Dir(filePath))
 		err := os.MkdirAll(path.Dir(filePath), 0755)
 		if err != nil {
 			return nil, op.Err(err)
@@ -68,7 +52,7 @@ func NewLogger(filePath string, flushFreq time.Duration) (*Logger, error) {
 		return nil, op.Err(err)
 	}
 
-	logger := &Logger{
+	logger := &logger{
 		filepath:  filePath,
 		file:      file,
 		writer:    bufio.NewWriter(file),
@@ -84,45 +68,45 @@ func NewLogger(filePath string, flushFreq time.Duration) (*Logger, error) {
 }
 
 // Log adds a new log entry to the channel synchronously.
-func (l *Logger) LogSync(entry string) {
+func (l *logger) LogSync(entry string) {
 	l.mu.Lock()
 	_, err := l.writer.WriteString(entry + "\n")
 	if err != nil {
-		fmt.Printf("Error writing log entry: %v\n", err)
+		gko.Err(err).Op("logfile.LogSync")
 	}
 	l.mu.Unlock()
 }
 
 // Log adds a new log entry to the channel synchronously.
-func (l *Logger) LogBytes(entry []byte) {
+func (l *logger) LogBytes(entry []byte) {
 	l.mu.Lock()
 	_, err := l.writer.Write(entry)
 	l.writer.WriteString("\n")
 	if err != nil {
-		fmt.Printf("Error writing log entry: %v\n", err)
+		gko.Err(err).Op("logfile.LogBytes")
 	}
 	l.mu.Unlock()
 }
 
 // Log adds a new log entry to the channel asynchronously.
-func (l *Logger) LogAsync(entry string) {
+func (l *logger) LogAsync(entry string) {
 	l.ch <- entry
 }
 
 // processEntries handles log entries asynchronously
-func (l *Logger) processEntries() {
+func (l *logger) processEntries() {
 	for entry := range l.ch {
 		l.mu.Lock()
 		_, err := l.writer.WriteString(entry + "\n")
 		if err != nil {
-			fmt.Printf("Error writing log entry: %v\n", err)
+			gko.Err(err).Op("logfile.LogAsync")
 		}
 		l.mu.Unlock()
 	}
 }
 
 // periodicFlush flushes the writer at regular intervals
-func (l *Logger) periodicFlush() {
+func (l *logger) periodicFlush() {
 	ticker := time.NewTicker(l.flushFreq)
 	defer ticker.Stop()
 	for {
@@ -132,7 +116,7 @@ func (l *Logger) periodicFlush() {
 				l.mu.Lock()
 				err := l.writer.Flush()
 				if err != nil {
-					fmt.Printf("Error flushing log writer: %v\n", err)
+					gko.Err(err).Op("logfile.Flush")
 				}
 				l.mu.Unlock()
 			}
@@ -143,17 +127,17 @@ func (l *Logger) periodicFlush() {
 }
 
 // Close flushes and closes the file logger.
-func (l *Logger) Close() {
+func (l *logger) Close() {
 	close(l.ch)
 	close(l.done)
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	err := l.writer.Flush()
 	if err != nil {
-		gko.Err(err).Op("loggerfile.Close").Ctx("logger", l.filepath)
+		gko.Err(err).Op("logfile.Close").Ctx("logger", l.filepath)
 	}
 	err = l.file.Close()
 	if err != nil {
-		gko.Err(err).Op("loggerfile.Close").Ctx("logger", l.filepath)
+		gko.Err(err).Op("logfile.Close").Ctx("logger", l.filepath)
 	}
 }

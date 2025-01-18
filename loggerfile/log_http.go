@@ -8,7 +8,7 @@ import (
 )
 
 // Implementación simple de log http como JSON al stdout.
-func (l *Logger) SaveLog(entr gecko.LogEntry) {
+func (l *logger) SaveLog(entr gecko.LogEntry) {
 	logBytes, err := json.Marshal(entr)
 	if err != nil {
 		gko.Err(err).Op("loggerfile.SaveLog").Log()
