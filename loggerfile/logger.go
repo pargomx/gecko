@@ -43,6 +43,12 @@ type Logger struct {
 // solicitudes en poco tiempo.
 func NewLogger(filePath string, flushFreq time.Duration) (*Logger, error) {
 	op := gko.Op("loggerfile.NewLogger").Ctx("file", filePath).Ctx("flushFreq", flushFreq)
+	if filePath == "" {
+		return nil, op.ErrDatoIndef().Str("log file path undefined")
+	}
+	if flushFreq < time.Second { // Mínimo 1s de intervalo.
+		flushFreq = time.Second * 5 // Default 5s.
+	}
 
 	// Crear directorio si no existe.
 	_, err := os.Stat(path.Dir(filePath))

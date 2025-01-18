@@ -62,6 +62,9 @@ func NewLogger(dbPath string, flushFreq time.Duration) (*logger, error) {
 	if dbPath == "" {
 		return nil, op.ErrDatoIndef().Str("db no especificada")
 	}
+	if flushFreq < time.Second { // Mínimo 1s de intervalo.
+		flushFreq = time.Second * 5 // Default 5s.
+	}
 
 	// Crear directorio si no existe.
 	_, err := os.Stat(path.Dir(dbPath))
@@ -141,9 +144,6 @@ func (l *logger) SaveLog(entry gecko.LogEntry) {
 
 // Saves all entries in buffer at regular intervals.
 func (l *logger) periodicFlush() {
-	if l.flushFreq < time.Second {
-		l.flushFreq = time.Second // Mínimo 1s de intervalo.
-	}
 	ticker := time.NewTicker(l.flushFreq)
 	defer ticker.Stop()
 	for range ticker.C {
