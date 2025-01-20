@@ -122,14 +122,14 @@ func (g *Gecko) File(path, file string) {
 // Jamás poner a disposición del usuario!
 func (g *Gecko) FileAbs(path, fpath string) {
 	if !filepath.IsAbs(fpath) {
-		gko.FatalExitf("ruta absoluta inválida: %s", fpath)
+		gko.FatalExitf("gecko.Router: ruta absoluta inválida: %s", fpath)
 	}
 	fi, err := os.Stat(fpath)
 	if err != nil {
 		gko.Err(err).Op("FileAbs.Stat('" + fpath + "')").FatalExit()
 	}
 	if fi.IsDir() {
-		gko.FatalExitf("FileAbs('%s') es un directorio", fpath)
+		gko.FatalExitf("gecko.Router: FileAbs('%s') es un directorio", fpath)
 	}
 	g.registrarRuta(http.MethodGet, path, func(c *Context) error {
 		fi, err = os.Stat(fpath)
@@ -192,24 +192,24 @@ func (c *Context) FileInline(file, name string) error {
 func mustSubFS(currentFs fs.FS, subdir string) fs.FS {
 	subdir = filepath.ToSlash(filepath.Clean(subdir))
 	if subdir == "." || subdir == "./" || subdir == "" {
-		gko.FatalExitf("subdir inválido: utilice Static(...) para servir '%s'", subdir)
+		gko.FatalExitf("gecko.Router: subdir inválido: utilice Static(...) para servir '%s'", subdir)
 	}
 	if strings.HasPrefix(subdir, "/") {
-		gko.FatalExitf("subdir inválido: '%s' no es relativo", subdir)
+		gko.FatalExitf("gecko.Router: subdir inválido: '%s' no es relativo", subdir)
 	}
 	if strings.HasPrefix(subdir, "..") {
-		gko.FatalExitf("subdir inválido: no se permite '../' en %s", subdir)
+		gko.FatalExitf("gecko.Router: subdir inválido: no se permite '../' en %s", subdir)
 	}
 	rootInfo, err := fs.Stat(currentFs, subdir)
 	if err != nil {
-		gko.FatalExitf("subdir inválido: %v", err)
+		gko.FatalExitf("gecko.Router: subdir inválido: %v", err)
 	}
 	if !rootInfo.IsDir() {
-		gko.FatalExitf("subdir inválido: %s no es un directorio", subdir)
+		gko.FatalExitf("gecko.Router: subdir inválido: %s no es un directorio", subdir)
 	}
 	subFs, err := fs.Sub(currentFs, subdir)
 	if err != nil {
-		gko.FatalExitf("imposible crear subFS: subdir inválido: %v", err)
+		gko.FatalExitf("gecko.Router: imposible crear subFS: subdir inválido: %v", err)
 	}
 	return subFs
 }
@@ -225,14 +225,14 @@ func mustSubFS(currentFs fs.FS, subdir string) fs.FS {
 // Servirá "/home/user/static/hola.html" en la ruta "/x/hola.html"
 func (g *Gecko) StaticAbs(rutaWeb string, absolutePath string) {
 	if !filepath.IsAbs(absolutePath) {
-		gko.FatalExitf("ruta absoluta inválida: %s", absolutePath)
+		gko.FatalExitf("gecko.Router: ruta absoluta inválida: %s", absolutePath)
 	}
 	rootInfo, err := os.Stat(absolutePath)
 	if err != nil {
-		gko.FatalExitf("ruta absoluta inválida: %v", err)
+		gko.FatalExitf("gecko.Router: ruta absoluta inválida: %v", err)
 	}
 	if !rootInfo.IsDir() {
-		gko.FatalExitf("ruta absoluta inválida: %s no es un directorio", absolutePath)
+		gko.FatalExitf("gecko.Router: ruta absoluta inválida: %s no es un directorio", absolutePath)
 	}
 	handler := staticDirectoryHandler(os.DirFS(absolutePath))
 	g.registrarRuta(http.MethodGet, rutaWeb, handler)

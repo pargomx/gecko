@@ -77,18 +77,18 @@ func (g *Gecko) registrarNotFoundHandler() {
 func toMuxPattern(método string, ruta string) string {
 	// Validar la ruta.
 	if strings.Contains(ruta, " ") {
-		gko.FatalExitf("La ruta no puede contener espacios en blanco: '%s'", ruta)
+		gko.FatalExitf("gecko.Router: ruta no puede contener espacios en blanco: '%s'", ruta)
 	}
 	ruta = strings.TrimSuffix(ruta, "/")
 	if ruta == "" {
 		ruta = "/{$}"
 	}
 	if ruta[0] != '/' {
-		gko.FatalExitf("La ruta debe comenzar con slash: '%s'", ruta)
+		gko.FatalExitf("gecko.Router: ruta debe comenzar con slash: '%s'", ruta)
 	}
 	// Validar método.
 	if método == "" {
-		gko.FatalExitf("El método no puede estar indefinido: '%s'", ruta)
+		gko.FatalExitf("gecko.Router: método no puede estar indefinido: '%s'", ruta)
 	}
 	return método + " " + ruta
 }
