@@ -54,7 +54,7 @@ func (c *Context) Redirect(code int, url string) error {
 //
 // HTMX: 200 OK "Redirigiendo a..." & header HX-Redirect.
 func (c *Context) Redir(url string) error {
-	if c.EsHTMX() {
+	if c.EsHTMX() && !(c.request.Method == "GET" || c.request.Method == "HEAD") {
 		c.response.Header().Set("HX-Redirect", url)
 		return c.StatusOk("Redirigiendo a " + url)
 	}
@@ -69,7 +69,7 @@ func (c *Context) Redir(url string) error {
 //
 // HTMX: 200 OK "Redirigiendo a..." & header HX-Redirect.
 func (c *Context) Redirf(format string, a ...any) error {
-	if c.EsHTMX() {
+	if c.EsHTMX() && !(c.request.Method == "GET" || c.request.Method == "HEAD") {
 		c.response.Header().Set("HX-Redirect", fmt.Sprintf(format, a...))
 		return c.StatusOk("Redirigiendo a " + fmt.Sprintf(format, a...))
 	}
