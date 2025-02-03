@@ -125,7 +125,7 @@ func (g *Gecko) DEL(path string, handler HandlerFunc) {
 // Registra un handler que redirige con StatusSeeOther (303) a la URL dada.
 func (g *Gecko) Redir(path string, redirURL string) {
 	g.registrarRuta(http.MethodGet, path, func(c *Context) error {
-		return c.Redirect(http.StatusSeeOther, redirURL)
+		return c.RedirOtro(redirURL)
 	})
 }
 
