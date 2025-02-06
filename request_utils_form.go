@@ -2,6 +2,7 @@ package gecko
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/pargomx/gecko/gkt"
@@ -165,4 +166,16 @@ func (c *Context) MultiFormUintMust(name string) ([]uint64, error) {
 		res = append(res, n)
 	}
 	return res, nil
+}
+
+// ================================================================ //
+
+// Deprecated. Transformar texto en capa de aplicación, no en handler.
+func (c *Context) FormUpper(name string) string {
+	return strings.ToUpper(gkt.SinEspaciosExtra(c.request.FormValue(name)))
+}
+
+// Deprecated. Transformar texto en capa de aplicación, no en handler.
+func (c *Context) FormLower(name string) string {
+	return strings.ToLower(gkt.SinEspaciosExtra(c.request.FormValue(name)))
 }
