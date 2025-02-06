@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/pargomx/gecko/gkt"
 )
 
 // LogEntry corresponde a un elemento de la tabla 'loghttp'.
@@ -36,7 +38,7 @@ type HTTPLogger interface {
 }
 
 func (g *Gecko) logHTTP(c *Context, err error) {
-	bytesIn, _ := TxtUint64(c.request.Header.Get("Content-Length"))
+	bytesIn, _ := gkt.ToUint64(c.request.Header.Get("Content-Length"))
 	origin := c.request.Header.Get("Origin")
 	logEnt := LogEntry{
 		Timestamp:    c.time,

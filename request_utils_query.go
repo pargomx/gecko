@@ -3,127 +3,120 @@ package gecko
 import (
 	"errors"
 	"time"
+
+	"github.com/pargomx/gecko/gkt"
 )
 
 // ================================================================ //
 // ========== QUERY PARAMS ======================================== //
 
-// Valor del query sin sanitizar.
+// Valor del query sin modificar.
 func (c *Context) QueryTalCual(name string) string {
 	return c.QueryParam(name)
 }
 
-// Valor del query sanitizado.
+// Valor del query espaciado simple sin saltos de línea.
 func (c *Context) QueryVal(name string) string {
-	return TxtSanitizar(c.QueryParam(name))
+	return gkt.SinEspaciosExtra(c.QueryParam(name))
 }
 
-// Valor del query sanitizado en mayúsculas.
-func (c *Context) QueryUpper(name string) string {
-	return TxtUpper(c.QueryParam(name))
-}
-
-// Valor del query sanitizado en minúsculas.
-func (c *Context) QueryLower(name string) string {
-	return TxtLower(c.QueryParam(name))
+// Valor del query espaciado simple sin saltos de línea, sino el default.
+func (c *Context) QueryParamDefault(name, defaultValue string) string {
+	value := gkt.SinEspaciosExtra(c.QueryParam(name))
+	if value == "" {
+		return defaultValue
+	}
+	return value
 }
 
 // Valor del query convertido a bool.
 // Retorna false a menos de que el valor sea: "on", "true", "1".
 func (c *Context) QueryBool(name string) bool {
-	return TxtBool(c.QueryParam(name))
+	return gkt.ToBool(c.QueryParam(name))
 }
 
 // Valor del query convertido a entero.
 func (c *Context) QueryIntMust(name string) (int, error) {
-	return TxtInt(c.QueryParam(name))
+	return gkt.ToInt(c.QueryParam(name))
 }
 
 // Valor del query convertido a entero sin verificar error (default 0).
 func (c *Context) QueryInt(name string) int {
-	num, _ := TxtInt(c.QueryParam(name))
+	num, _ := gkt.ToInt(c.QueryParam(name))
 	return num
 }
 
 // Valor del query convertido a uint64.
 func (c *Context) QueryUintMust(name string) (uint64, error) {
-	return TxtUint64(c.QueryParam(name))
+	return gkt.ToUint64(c.QueryParam(name))
 }
 
 // Valor del query convertido a uint64 sin verificar error (default 0).
 func (c *Context) QueryUint(name string) uint64 {
-	num, _ := TxtUint64(c.QueryParam(name))
+	num, _ := gkt.ToUint64(c.QueryParam(name))
 	return num
 }
 
 // Valor del query convertido a centavos.
 func (c *Context) QueryCentavos(name string) (int, error) {
-	return TxtCentavos(c.QueryParam(name))
-}
-
-// Valor del query convertido a time.
-func (c *Context) QueryTime(name string, layout string) (time.Time, error) {
-	return TxtTime(c.QueryParam(name), layout)
-}
-
-// Valor del query convertido a time, que puede estar indefinido.
-func (c *Context) QueryTimeNullable(name string, layout string) (*time.Time, error) {
-	return TxtTimeNullable(c.QueryParam(name), layout)
+	return gkt.ToCentavos(c.QueryParam(name))
 }
 
 // Valor del query convertido a time desde una fecha 28/08/2022 o 2022-02-13.
 func (c *Context) QueryFecha(name string, layout string) (time.Time, error) {
-	return TxtFecha(c.QueryParam(name))
+	return gkt.ToFecha(c.QueryParam(name))
 }
 
-// Valor del path formato fecha convertido a time, que puede estar indefinido.
+// Valor del query formato fecha convertido a time, que puede estar indefinido.
 func (c *Context) QueryFechaNullable(name string) (*time.Time, error) {
-	return TxtFechaNullable(c.QueryParam(name))
+	return gkt.ToFechaNullable(c.QueryParam(name))
+}
+
+// Valor del query convertido a time desde una fecha con hora.
+func (c *Context) QueryFechaHora(name string) (time.Time, error) {
+	return gkt.ToFechaHora(c.QueryParam(name))
+}
+
+// Valor del query formato fecha con hora convertido a time, que puede estar indefinido.
+func (c *Context) QueryFechaHoraNullable(name string) (*time.Time, error) {
+	return gkt.ToFechaHoraNullable(c.QueryParam(name))
+}
+
+// Valor del query convertido a time.
+func (c *Context) QueryTime(name string, layout string) (time.Time, error) {
+	return gkt.ToTime(c.QueryParam(name), layout)
+}
+
+// Valor del query convertido a time, que puede estar indefinido.
+func (c *Context) QueryTimeNullable(name string, layout string) (*time.Time, error) {
+	return gkt.ToTimeNullable(c.QueryParam(name), layout)
 }
 
 // ================================================================ //
 
-// Múltiples valores sin sanitizar obtenidos del query.
-func (c *Context) QueryValues(name string) []string {
+// Múltiples valores obtenidos del query sin modificar.
+func (c *Context) MultiQueryTalCual(name string) []string {
 	if c.query == nil {
 		c.query = c.request.URL.Query()
 	}
 	return c.query[name]
 }
 
-// Múltiples valores sanitizados obtenidos del query.
+// Múltiples valores obtenidos del query espaciado simple sin saltos de línea.
 func (c *Context) MultiQueryVal(name string) []string {
 	res := []string{}
-	for _, v := range c.QueryValues(name) {
-		res = append(res, TxtSanitizar(v))
+	for _, v := range c.MultiQueryTalCual(name) {
+		res = append(res, gkt.SinEspaciosExtra(v))
 	}
 	return res
 }
 
-// Múltiples valores sanitizados en mayúsculas obtenidos del query.
-func (c *Context) MultiQueryUpper(name string) []string {
-	res := []string{}
-	for _, v := range c.QueryValues(name) {
-		res = append(res, TxtUpper(v))
-	}
-	return res
-}
-
-// Múltiples valores sanitizados en minúsculas obtenidos del query.
-func (c *Context) MultiQueryLower(name string) []string {
-	res := []string{}
-	for _, v := range c.QueryValues(name) {
-		res = append(res, TxtLower(v))
-	}
-	return res
-}
-
-// Múltiples valores convertidos a enteros obtenidos del query.
+// Múltiples valores obtenidos del query convertidos a enteros.
 // No se agregan los valores que tengan errores en la conversión.
 func (c *Context) MultiQueryInt(name string) []int {
 	res := []int{}
-	for _, v := range c.QueryValues(name) {
-		n, err := TxtInt(v)
+	for _, v := range c.MultiQueryTalCual(name) {
+		n, err := gkt.ToInt(v)
 		if err != nil {
 			continue
 		}
@@ -132,12 +125,12 @@ func (c *Context) MultiQueryInt(name string) []int {
 	return res
 }
 
-// Múltiples valores convertidos a enteros obtenidos del query.
+// Múltiples valores obtenidos del query convertidos a enteros.
 // Los valores deben ser números válidos todos.
 func (c *Context) MultiQueryIntMust(name string) ([]int, error) {
 	res := []int{}
-	for _, v := range c.QueryValues(name) {
-		n, err := TxtInt(v)
+	for _, v := range c.MultiQueryTalCual(name) {
+		n, err := gkt.ToInt(v)
 		if err != nil {
 			return nil, errors.New("el valor [" + v + "] no es un número válido para [" + name + "]")
 		}
@@ -146,12 +139,12 @@ func (c *Context) MultiQueryIntMust(name string) ([]int, error) {
 	return res, nil
 }
 
-// Múltiples valores convertidos a enteros obtenidos del query.
+// Múltiples valores obtenidos del query convertidos a enteros.
 // No se agregan los valores que tengan errores en la conversión.
 func (c *Context) MultiQueryUint(name string) []uint64 {
 	res := []uint64{}
-	for _, v := range c.QueryValues(name) {
-		n, err := TxtUint64(v)
+	for _, v := range c.MultiQueryTalCual(name) {
+		n, err := gkt.ToUint64(v)
 		if err != nil {
 			continue
 		}
@@ -160,32 +153,16 @@ func (c *Context) MultiQueryUint(name string) []uint64 {
 	return res
 }
 
-// Múltiples valores convertidos a enteros obtenidos del query.
+// Múltiples valores obtenidos del query convertidos a enteros.
 // Los valores deben ser números válidos todos.
 func (c *Context) MultiQueryUintMust(name string) ([]uint64, error) {
 	res := []uint64{}
-	for _, v := range c.QueryValues(name) {
-		n, err := TxtUint64(v)
+	for _, v := range c.MultiQueryTalCual(name) {
+		n, err := gkt.ToUint64(v)
 		if err != nil {
 			return nil, errors.New("el valor [" + v + "] no es un número válido para [" + name + "]")
 		}
 		res = append(res, n)
 	}
 	return res, nil
-}
-
-// ================================================================ //
-
-// QueryParamDefault returns the query param value or default
-// value for the provided name. Note: it does not distinguish
-// if form had no value by that name or value was empty string
-func (c *Context) QueryParamDefault(name, defaultValue string) string {
-	if c.query == nil {
-		c.query = c.request.URL.Query()
-	}
-	value := c.query.Get(name)
-	if value == "" {
-		return defaultValue
-	}
-	return value
 }
