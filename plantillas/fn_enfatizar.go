@@ -9,6 +9,7 @@ import (
 var (
 	reBold   = regexp.MustCompile(`\*(.*?)\*`)
 	reItalic = regexp.MustCompile(`_(.*?)_`)
+	reCode   = regexp.MustCompile("`(.*?)`")
 )
 
 // Enfatizar busca texto entre asteriscos y lo convierte en negritas,
@@ -20,6 +21,9 @@ func Enfatizar(text string) template.HTML {
 	})
 	escapedText = reItalic.ReplaceAllStringFunc(escapedText, func(match string) string {
 		return "<em>" + strings.Trim(match, "_") + "</em>"
+	})
+	escapedText = reCode.ReplaceAllStringFunc(escapedText, func(match string) string {
+		return "<code>" + strings.Trim(match, "`") + "</code>"
 	})
 	return template.HTML(escapedText)
 }
