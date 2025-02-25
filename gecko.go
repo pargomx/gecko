@@ -34,6 +34,8 @@ type Gecko struct {
 
 	TmplBaseLayout string // Nombre de la plantilla base.
 	TmplError      string // Nombre de la plantilla para errores.
+
+	CleanupFunc func() // Ejecutar para un graceful shutdown.
 }
 
 // Implementa la interfaz http.Handler.
@@ -80,11 +82,28 @@ func NewSinRoot404() *Gecko {
 	return g
 }
 
-// Inicia el servidor HTTP.
+// Iniciar servidor HTTP: escuchar en puerto TCP.
 func (g *Gecko) IniciarEnPuerto(port int) error {
 	if port < 1 || port > 65535 {
 		return gko.ErrDatoInvalido().Msg("puerto TCP inválido")
 	}
+	// Manejar terminación del servidor
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
+	go func() {
+		sig := <-signalChan // solamente manejar la primera señal y salir.
+		if g.CleanupFunc != nil {
+			g.CleanupFunc()
+		}
+		if g.HTTPLogger != nil {
+			g.HTTPLogger.Close()
+		}
+
+		fmt.Println("")
+		gko.LogInfof("Servidor terminado: %v", sig.String())
+		os.Exit(0)
+	}()
+	// Comenzar servidor
 	srv := http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
 		Handler: g,
@@ -93,28 +112,36 @@ func (g *Gecko) IniciarEnPuerto(port int) error {
 	return srv.ListenAndServe()
 }
 
-// Create a Unix domain sock and listen for incoming connections.
+// Iniciar servidor HTTP: escuchar en unix domain socket.
 func (g *Gecko) IniciarEnSocket(socket string) error {
 	if socket == "" {
 		return gko.ErrDatoIndef().Msg("socket path indefinido")
 	}
+	// Manejar terminación del servidor
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
+	go func() {
+		sig := <-signalChan // solamente manejar la primera señal y salir.
+		if g.CleanupFunc != nil {
+			g.CleanupFunc()
+		}
+		if g.HTTPLogger != nil {
+			g.HTTPLogger.Close()
+		}
+
+		err := os.Remove(socket)
+		if err != nil {
+			gko.Op("Shutdown").Str("quitar socket file").Err(err).Log()
+		}
+		fmt.Println("")
+		gko.LogInfof("Servidor terminado: %v", sig.String())
+		os.Exit(0)
+	}()
+	// Comenzar servidor
 	sock, err := net.Listen("unix", socket)
 	if err != nil {
 		return err
 	}
-	// Cleanup the socket file.
-	exitChan := make(chan os.Signal, 1)
-	signal.Notify(exitChan, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-exitChan
-		err = os.Remove(socket)
-		if err != nil {
-			gko.LogError(err)
-		} else {
-			gko.LogInfof("socket removido %v", socket)
-		}
-		os.Exit(0)
-	}()
 	gko.LogEventof("Escuchando en unix %v", socket)
 	return http.Serve(sock, g)
 }
