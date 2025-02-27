@@ -22,33 +22,36 @@ func (c *Context) TriggerEventoHTMX(evento string) {
 	c.response.Header().Set("HX-Trigger", evento)
 }
 
+// ================================================================ //
+// ========== Askfor ============================================== //
+
 // Responder con lo especificado en el cliente mediante el
-// atributo hg-askfor. Se pueden solicitar tres cosas:
+// atributo hx-askfor. Se pueden solicitar tres cosas:
 //
 // Redirección simple al recurso:
-//  'hx-put="/some" hg-askfor="/recurso" ...'
+//  'hx-put="/some" hx-askfor="/recurso" ...'
 //
 // Recarga de la página con esta url.
-//  'hx-put="/some" hg-askfor="full:/recurso" '
+//  'hx-put="/some" hx-askfor="full:/recurso" '
 //
 // Lanzar este evento con htmx.
-//  'hx-put="/some" hg-askfor="event:somethingHappend" '
+//  'hx-put="/some" hx-askfor="event:somethingHappend" '
 //
-// Si la solicitud no tiene el header Hg-Askfor se responde con fallback con c.RedirOtrof().
+// Si la solicitud no tiene el header Hx-Askfor se responde con fallback con c.RedirOtrof().
 //
 // Para que funcione el cliente debe tener htmx y este eventListener:
 /*
 	document.addEventListener("htmx:configRequest", function (event) {
-		if (event.target.hasAttribute("hg-askfor")) {
-			const askforVal = event.target.getAttribute("hg-askfor");
+		if (event.target.hasAttribute("hx-askfor")) {
+			const askforVal = event.target.getAttribute("hx-askfor");
 			if (askforVal && askforVal.length > 0) {
-				event.detail.headers["Hg-Askfor"] = askforVal;
+				event.detail.headers["Hx-Askfor"] = askforVal;
 			}
 		}
 	});
 */
 func (c *Context) AskedForFallback(fallbackRedir string, a ...any) error {
-	askfor := c.Request().Header.Get("Hg-Askfor")
+	askfor := c.Request().Header.Get(HxAskfor)
 	askfor = gkt.SinEspaciosNinguno(askfor)
 
 	// Fallback si no se pidió algo específico.
@@ -78,17 +81,17 @@ func (c *Context) AskedForFallback(fallbackRedir string, a ...any) error {
 }
 
 // Responder con lo especificado en el cliente mediante el
-// atributo hg-askfor. Se pueden solicitar tres cosas:
+// atributo hx-askfor. Se pueden solicitar tres cosas:
 //
-// hg-askfor="/recurso" Redirección simple al recurso.
+// hx-askfor="/recurso" Redirección simple al recurso.
 //
-// hg-askfor="full:/recurso" Recarga de la página con esta url.
+// hx-askfor="full:/recurso" Recarga de la página con esta url.
 //
-// hg-askfor="event:somethingHappend" Lanzar este evento con htmx.
+// hx-askfor="event:somethingHappend" Lanzar este evento con htmx.
 //
-// Si la solicitud no tiene el header Hg-Askfor se responde con c.StringOk("Ok")
+// Si la solicitud no tiene el header Hx-Askfor se responde con c.StringOk("Ok")
 func (c *Context) AskedFor() error {
-	askfor := c.Request().Header.Get("Hg-Askfor")
+	askfor := c.Request().Header.Get(HxAskfor)
 	askfor = gkt.SinEspaciosNinguno(askfor)
 
 	// Fallback si no se pidió algo específico.

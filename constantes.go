@@ -170,4 +170,7 @@ const (
 	HxTarget                = "HX-Target"                  // Request header: the id of the target element if it exists
 	HxTriggerName           = "HX-Trigger-Name"            // Request header: the name of the triggered element if it exists
 	HxTriggerReq            = "HX-Trigger"                 // Request header: the id of the triggered element if it exists
+
+	HxPromptEncoded = "HX-Prompt-Encoded" // Request header: (gecko) la respuesta url encoded a un hx-prompt
+	HxAskfor        = "Hx-Askfor"         // Request header: (gecko) lo que el cliente solicita como respuesta mediante hx-askfor
 )

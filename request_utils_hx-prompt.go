@@ -1,27 +1,36 @@
 package gecko
 
 import (
+	"net/url"
 	"time"
 
+	"github.com/pargomx/gecko/gko"
 	"github.com/pargomx/gecko/gkt"
 )
 
 // ================================================================ //
 // ========== HX-Prompt Header ==================================== //
 
-// Valor del header Hx-Prompt sin modificar.
+// Valor del header Hx-Prompt-Encoded decodificado, o sino Hx-Prompt sin modificar.
 func (c *Context) PromptTalCual() string {
-	return c.request.Header.Get(HxPrompt)
+	prompt, err := url.QueryUnescape(c.request.Header.Get(HxPromptEncoded))
+	if err != nil {
+		gko.Err(err).Strf("decoding HxPromptEncoded '%s'", c.request.Header.Get(HxPromptEncoded)).Log()
+	}
+	if prompt == "" {
+		prompt = c.request.Header.Get(HxPrompt)
+	}
+	return prompt
 }
 
 // Valor del header Hx-Prompt espaciado simple sin saltos de línea.
 func (c *Context) PromptVal() string {
-	return gkt.SinEspaciosExtra(c.request.Header.Get(HxPrompt))
+	return gkt.SinEspaciosExtra(c.PromptTalCual())
 }
 
 // Valor del header Hx-Prompt espaciado simple sin saltos de línea, sino el default.
 func (c *Context) PromptValDefault(name, defaultValue string) string {
-	value := gkt.SinEspaciosExtra(c.request.Header.Get(HxPrompt))
+	value := gkt.SinEspaciosExtra(c.PromptTalCual())
 	if value == "" {
 		return defaultValue
 	}
