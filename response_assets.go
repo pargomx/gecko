@@ -11,7 +11,7 @@ import (
 // Recurso estático
 type staticResource struct {
 	content  []byte
-	etag     string
+	etag     string // sha1 entre dobles comillas
 	mimeType string
 }
 
@@ -41,7 +41,7 @@ func (g *Gecko) AgregarRecurso(name string, content []byte, mimeType string) err
 	}
 	g.staticFiles[name] = staticResource{
 		content:  content,
-		etag:     fmt.Sprintf("%x", h.Sum(nil)),
+		etag:     fmt.Sprintf("\"%x\"", h.Sum(nil)),
 		mimeType: mimeType,
 	}
 	return nil
@@ -57,7 +57,6 @@ func (g *Gecko) ServirRecurso(name string) HandlerFunc {
 	return func(c *Context) error {
 		// Check if Etag matches the one in the 'If-None-Match' header
 		if match := c.request.Header.Get("If-None-Match"); match != "" {
-			gko.LogDebugf("Etag server: %s client: %s", res.etag, match)
 			if match == res.etag {
 				return c.NoContent(Status304NotModified)
 			}
