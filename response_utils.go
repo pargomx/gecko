@@ -22,6 +22,13 @@ func (c *Context) String(code int, s string) (err error) {
 	return c.Blob(code, MIMETextPlainCharsetUTF8, []byte(s))
 }
 
+func (c *Context) ContentOk(contentType string, content []byte) (err error) {
+	c.writeContentType(contentType)
+	c.response.WriteHeader(200)
+	_, err = c.response.Write(content)
+	return
+}
+
 // Responder con status code y MIME especificados. Ver gecko.MIME...
 func (c *Context) Blob(code int, contentType string, b []byte) (err error) {
 	c.writeContentType(contentType)
@@ -39,6 +46,7 @@ func (c *Context) Stream(code int, contentType string, r io.Reader) (err error) 
 }
 
 // Responder con un body vacío y un status code.
+// Útil para enviar un Status304NotModified.
 func (c *Context) NoContent(code int) error {
 	c.response.WriteHeader(code)
 	return nil

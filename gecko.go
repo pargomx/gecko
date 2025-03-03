@@ -32,6 +32,8 @@ type Gecko struct {
 
 	Filesystem fs.FS // Utilizado por los file handlers.
 
+	staticFiles map[string]staticResource
+
 	TmplBaseLayout string // Nombre de la plantilla base.
 	TmplError      string // Nombre de la plantilla para errores.
 
