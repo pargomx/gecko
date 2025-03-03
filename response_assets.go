@@ -72,8 +72,14 @@ func (g *Gecko) ServirRecurso(name string) HandlerFunc {
 // ================================================================ //
 // ========== Recursos estándar =================================== //
 
-//go:embed gecko.js
+//go:embed javascript/gecko.js
 var geckoJsExtension []byte
+
+//go:embed javascript/htmx.js
+var htmxJs []byte
+
+//go:embed javascript/htmx.min.js
+var htmxMinJs []byte
 
 // Extensión gecko para htmx.
 // Colocar en una ruta como "/gecko.js" y activar con hx-ext="gecko".
@@ -81,4 +87,18 @@ func (g *Gecko) ServirGeckoJS() HandlerFunc {
 	g.AgregarRecurso("gecko.js", geckoJsExtension,
 		MIMEApplicationJavaScriptCharsetUTF8)
 	return g.ServirRecurso("gecko.js")
+}
+
+// Librería HTMX.js
+func (g *Gecko) ServirHtmxJS() HandlerFunc {
+	g.AgregarRecurso("htmx.js", htmxJs,
+		MIMEApplicationJavaScriptCharsetUTF8)
+	return g.ServirRecurso("htmx.js")
+}
+
+// Librería HTMX.js
+func (g *Gecko) ServirHtmxMinJS() HandlerFunc {
+	g.AgregarRecurso("htmx.min.js", htmxMinJs,
+		MIMEApplicationJavaScriptCharsetUTF8)
+	return g.ServirRecurso("htmx.min.js")
 }
