@@ -13,11 +13,19 @@ type staticResource struct {
 	content  []byte
 	etag     string // sha1 entre dobles comillas
 	mimeType string
+	lenght   string // content lenght in bytes
 }
 
 // Agrega un recurso estático a gecko para servirlo
 // utilizando su ETag obtenido con sha1.
-func (g *Gecko) AgregarRecurso(name string, content []byte, mimeType string) error {
+func (g *Gecko) AgregarRecurso(name string, content []byte, mimeType string) {
+	err := g.agregarRecurso(name, content, mimeType)
+	if err != nil {
+		gko.FatalError(err)
+	}
+}
+
+func (g *Gecko) agregarRecurso(name string, content []byte, mimeType string) error {
 	op := gko.Op("gecko.AgregarRecurso")
 	if name == "" {
 		return op.Str("nombre no especificado")
@@ -43,6 +51,7 @@ func (g *Gecko) AgregarRecurso(name string, content []byte, mimeType string) err
 		content:  content,
 		etag:     fmt.Sprintf("\"%x\"", h.Sum(nil)),
 		mimeType: mimeType,
+		lenght:   fmt.Sprintf("%d", len(content)),
 	}
 	return nil
 }
@@ -55,14 +64,20 @@ func (g *Gecko) ServirRecurso(name string) HandlerFunc {
 		gko.FatalExitf("gecko.ServirRecurso: recurso '%v' no registrado", name)
 	}
 	return func(c *Context) error {
-		// Check if Etag matches the one in the 'If-None-Match' header
+
+		// Enviar Content-Lenght incluso en 304.
+		c.response.Header().Set(HeaderContentLength, res.lenght)
+
+		// Enviar 304 si el Etag coincide con 'If-None-Match'.
 		if match := c.request.Header.Get("If-None-Match"); match != "" {
 			if match == res.etag {
 				return c.NoContent(Status304NotModified)
 			}
 		}
-		// Set Etag header and write content
+
+		// Enviar contenido con su Etag y Cache-Control.
 		c.response.Header().Set("Etag", res.etag)
+		c.response.Header().Set(HeaderCacheControl, "public, max-age=3600, stale-while-revalidate=18000, stale-if-error=18000")
 		c.response.Header().Set(HeaderContentType, res.mimeType)
 		return c.ContentOk(res.mimeType, res.content)
 	}
