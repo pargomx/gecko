@@ -14,7 +14,13 @@ const (
 	FormatoHora      = "15:04:05"
 )
 
-var tzMexico = mustLoadLocation("America/Mexico_City")
+// Timezone America/Mexico_City
+var TzMexico = mustLoadLocation("America/Mexico_City")
+
+// Ahora en México.
+func Now() time.Time {
+	return time.Now().In(TzMexico)
+}
 
 // mustLoadLocation is a helper function that panics if the location cannot be loaded.
 func mustLoadLocation(name string) *time.Location {
@@ -55,7 +61,7 @@ func ToFecha(txt string) (time.Time, error) {
 		txt = txt[6:] + "-" + txt[3:5] + "-" + txt[:2] // Siempre dejar layout "2006-01-02"
 	}
 	// ParseInLocation porque MySQL la espera en hora local.
-	tiempo, err := time.ParseInLocation(FormatoFecha, txt, tzMexico)
+	tiempo, err := time.ParseInLocation(FormatoFecha, txt, TzMexico)
 	if err != nil {
 		return time.Time{}, gko.ErrDatoInvalido().Err(err).Msg(msgErrFormatoFecha)
 	}
@@ -87,7 +93,7 @@ func ToFechaNullable(txt string) (*time.Time, error) {
 		txt = txt[6:] + "-" + txt[3:5] + "-" + txt[:2] // Siempre dejar layout "2006-01-02"
 	}
 	// ParseInLocation porque MySQL la espera en hora local.
-	tiempo, err := time.ParseInLocation(FormatoFecha, txt, tzMexico)
+	tiempo, err := time.ParseInLocation(FormatoFecha, txt, TzMexico)
 	if err != nil {
 		return nil, gko.ErrDatoInvalido().Err(err).Msg(msgErrFormatoFecha)
 	}
@@ -122,7 +128,7 @@ func ToFechaHora(txt string) (time.Time, error) {
 	txt = strings.ReplaceAll(txt, "/", "-") // Permitir "2006/01/02 23:18:00"
 	txt = strings.ReplaceAll(txt, "T", " ") // Permitir "2006-01-02T23:18:00"
 	// ParseInLocation porque MySQL la espera en hora local.
-	tiempo, err := time.ParseInLocation(FormatoFechaHora, txt, tzMexico)
+	tiempo, err := time.ParseInLocation(FormatoFechaHora, txt, TzMexico)
 	if err != nil {
 		return time.Time{}, gko.ErrDatoInvalido().Err(err).Msg(msgErrFormatoFechaHora)
 	}
@@ -152,7 +158,7 @@ func ToFechaHoraNullable(txt string) (*time.Time, error) {
 	txt = strings.ReplaceAll(txt, "/", "-") // Permitir "2006/01/02 23:18:00"
 	txt = strings.ReplaceAll(txt, "T", " ") // Permitir "2006-01-02T23:18:00"
 	// ParseInLocation porque MySQL la espera en hora local.
-	tiempo, err := time.ParseInLocation(FormatoFechaHora, txt, tzMexico)
+	tiempo, err := time.ParseInLocation(FormatoFechaHora, txt, TzMexico)
 	if err != nil {
 		return nil, gko.ErrDatoInvalido().Err(err).Msg(msgErrFormatoFechaHora)
 	}
@@ -179,7 +185,7 @@ func ToTime(txt string, layout string) (time.Time, error) {
 	}
 	txt = strings.ReplaceAll(txt, "/", "-") // Permitir "2006/01/02"
 	// ParseInLocation porque MySQL la espera en hora local.
-	tiempo, err := time.ParseInLocation(layout, txt, tzMexico)
+	tiempo, err := time.ParseInLocation(layout, txt, TzMexico)
 	if err != nil {
 		return time.Time{}, gko.ErrDatoInvalido().Err(err)
 	}
@@ -203,7 +209,7 @@ func ToTimeNullable(txt, layout string) (*time.Time, error) {
 	}
 	txt = strings.ReplaceAll(txt, "/", "-") // Permitir "2006/01/02"
 	// ParseInLocation porque MySQL la espera en hora local.
-	tiempo, err := time.ParseInLocation(layout, txt, tzMexico)
+	tiempo, err := time.ParseInLocation(layout, txt, TzMexico)
 	if err != nil {
 		return nil, gko.ErrDatoInvalido().Err(err)
 	}
