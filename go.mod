@@ -1,11 +1,11 @@
 module github.com/pargomx/gecko
 
-go 1.22.2
+go 1.24.1
 
 require (
 	github.com/glebarez/go-sqlite v1.22.0
 	github.com/jtorz/num-a-letra v0.0.0-20190228064825-21346932aaa0
-	golang.org/x/text v0.22.0
+	golang.org/x/text v0.23.0
 )
 
 require (
