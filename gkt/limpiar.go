@@ -100,3 +100,12 @@ func SinRiesgoParaID(txt string) string {
 
 // TODO: Agregar función que conserve espacios?
 // TODO: Hacer que SinRiesgo haga primero SinDiacriticos y ToSnake?
+
+// ================================================================ //
+
+// Quitar es un alias para quitar todas las apariciones de sub de txt.
+//
+//	strings.ReplaceAll(txt, sub, "")
+func Quitar(txt string, sub string) string {
+	return strings.ReplaceAll(txt, sub, "")
+}
