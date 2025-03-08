@@ -13,16 +13,28 @@ import (
 var (
 
 	// Acepta espacios, letras y acentos.
+	//  "a-zA-ZáéíóúÁÉÍÓÚ"
 	RegexLetrasAcentosEspacios = regexp.MustCompile(`^[a-zA-ZáéíóúÁÉÍÓÚ ]+$`)
 
 	// Acepta letras minúsculas y guiones.
+	//  "abcd...", "-"
 	RegexMinusculasGuiones = regexp.MustCompile(`^[a-z-]+$`)
 
 	// Acepta letras minúsculas sin espacios.
+	//  "abcd..."
 	RegexMinusculas = regexp.MustCompile(`^[a-z]+$`)
 
-	// Acepta letras minúsculas y mayúsculas, números y guiones.
-	RegexAlfanumericoGuiones = regexp.MustCompile(`^[a-zA-Z1-9-]+$`)
+	// Acepta letras minúsculas y mayúsculas, números, guiones.
+	//  "abcd...", "ABCD...", "1234...", "-"
+	RegexAlfaNumGuion = regexp.MustCompile(`^[a-zA-Z1-9-]+$`)
+
+	// Acepta letras minúsculas y mayúsculas, números, guiones bajos.
+	//  "abcd...", "ABCD...", "1234...", "_"
+	RegexAlfaNumUnderscore = regexp.MustCompile(`^[a-zA-Z1-9_]+$`)
+
+	// Acepta letras minúsculas y mayúsculas, números, guiones bajos, comas.
+	//  "abcd...", "ABCD...", "1234...", "_", ","
+	RegexAlfaNumUnderscoreComa = regexp.MustCompile(`^[a-zA-Z1-9_,]+$`)
 )
 
 // ================================================================ //

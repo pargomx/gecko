@@ -64,24 +64,23 @@ func (c *Context) AskedForFallback(fallbackRedir string, a ...any) error {
 		return c.RedirOtro(askfor)
 	}
 
-	// A veces se pide un evento.
-	evento, askEvent := strings.CutPrefix(askfor, "event:")
-	if askEvent {
-		c.TriggerEventoHTMX(evento)
-		return c.StringOk(evento)
-	}
-
 	// O quizá un full page reload. Solo permitir redirecciones al mismo sitio.
 	urlFullRedir, askFullRedir := strings.CutPrefix(askfor, "full:/")
 	if askFullRedir {
 		return c.RedirFull("/" + urlFullRedir)
 	}
 
+	// A veces se quiere un evento o varios.
+	if gkt.RegexAlfaNumUnderscoreComa.MatchString(askfor) {
+		c.TriggerEventoHTMX(askfor)
+		return c.StringOk("Ok")
+	}
+
 	return gko.ErrDatoInvalido().Strf("askfor invalid: %v", askfor)
 }
 
 // Responder con lo especificado en el cliente mediante el
-// atributo hx-askfor. Se pueden solicitar tres cosas:
+// atributo hx-askfor. El cliente puede solicitar:
 //
 // hx-askfor="/recurso" Redirección simple al recurso.
 //
@@ -89,14 +88,18 @@ func (c *Context) AskedForFallback(fallbackRedir string, a ...any) error {
 //
 // hx-askfor="event:somethingHappend" Lanzar este evento con htmx.
 //
-// Si la solicitud no tiene el header Hx-Askfor se responde con c.StringOk("Ok")
-func (c *Context) AskedFor() error {
+// Si la solicitud no tiene el header Hx-Askfor se responde con c.StringOk(msg)
+// y si no se da msg entonces de envía c.StringOk("Ok")
+func (c *Context) AskedFor(msg string) error {
 	askfor := c.Request().Header.Get(HxAskfor)
 	askfor = gkt.SinEspaciosNinguno(askfor)
 
 	// Fallback si no se pidió algo específico.
 	if askfor == "" {
-		return c.StringOk("Ok")
+		if msg == "" {
+			msg = "Ok"
+		}
+		return c.StringOk(msg)
 	}
 
 	// Mayoritariamente un recurso redirect.
@@ -104,17 +107,16 @@ func (c *Context) AskedFor() error {
 		return c.RedirOtro(askfor)
 	}
 
-	// A veces se pide un evento.
-	evento, askEvent := strings.CutPrefix(askfor, "event:")
-	if askEvent {
-		c.TriggerEventoHTMX(evento)
-		return c.StringOk(evento)
-	}
-
 	// O quizá un full page reload. Solo permitir redirecciones al mismo sitio.
 	urlFullRedir, askFullRedir := strings.CutPrefix(askfor, "full:/")
 	if askFullRedir {
 		return c.RedirFull("/" + urlFullRedir)
+	}
+
+	// A veces se quiere un evento o varios.
+	if gkt.RegexAlfaNumUnderscoreComa.MatchString(askfor) {
+		c.TriggerEventoHTMX(askfor)
+		return c.StringOk(msg)
 	}
 
 	return gko.ErrDatoInvalido().Strf("askfor invalid: %v", askfor)
