@@ -10,10 +10,11 @@ import (
 )
 
 var (
-	reBold   = regexp.MustCompile(`\*(.*?)\*`)
-	reItalic = regexp.MustCompile(`_(.*?)_`)
-	reCode   = regexp.MustCompile("`(.*?)`")
-	reLink   = regexp.MustCompile(`\[(.*?)\]\((.*?)\)`) // Link markdown [title](https://example.com)
+	reBold           = regexp.MustCompile(`\*(.*?)\*`)
+	reItalic         = regexp.MustCompile(`_(.*?)_`)
+	reCode           = regexp.MustCompile("`(.*?)`")
+	reCodeMultilinea = regexp.MustCompile("```([\\s\\S]*?)```")
+	reLink           = regexp.MustCompile(`\[(.*?)\]\((.*?)\)`) // Link markdown [title](https://example.com)
 )
 
 // Enfatizar busca texto entre asteriscos y lo convierte en negritas,
@@ -25,6 +26,9 @@ func Enfatizar(text string) template.HTML {
 	})
 	escapedText = reItalic.ReplaceAllStringFunc(escapedText, func(match string) string {
 		return "<em>" + strings.Trim(match, "_") + "</em>"
+	})
+	escapedText = reCodeMultilinea.ReplaceAllStringFunc(escapedText, func(match string) string {
+		return "<code style=\"white-space: pre; display: inline-block;\">" + strings.Trim(match, "`") + "</code>"
 	})
 	escapedText = reCode.ReplaceAllStringFunc(escapedText, func(match string) string {
 		return "<code>" + strings.Trim(match, "`") + "</code>"
