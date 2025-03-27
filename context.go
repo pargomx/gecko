@@ -17,6 +17,7 @@ type Context struct {
 	SesionID string
 	Sesion   any
 	time     time.Time // Momento en el que se comenzó a procesar la solicitud, utilizado para el log http.
+	Compress bool      // Activar compresión con gzip para Render y RenderOk.
 }
 
 func (c *Context) Request() *http.Request {
