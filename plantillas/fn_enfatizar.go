@@ -11,7 +11,7 @@ import (
 
 var (
 	reBold           = regexp.MustCompile(`\*(.*?)\*`)
-	reItalic         = regexp.MustCompile(`_(.*?)_`)
+	reItalic         = regexp.MustCompile(`\b_(.*?)_\b`)
 	reCode           = regexp.MustCompile("`(.*?)`")
 	reCodeMultilinea = regexp.MustCompile("```([\\s\\S]*?)```")
 	reLink           = regexp.MustCompile(`\[(.*?)\]\((.*?)\)`) // Link markdown [title](https://example.com)
