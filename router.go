@@ -65,7 +65,7 @@ func (g *Gecko) registrarNotFoundHandler() {
 			gecko:    g,
 			time:     time.Now(),
 		}
-		err := gko.ErrNoEncontrado()
+		err := gko.ErrNoEncontrado
 		g.responderErrorHTTP(c, err)
 		if g.HTTPLogger != nil {
 			g.logHTTP(c, err)

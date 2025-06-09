@@ -39,7 +39,7 @@ func ToCentavos(txt string) (int, error) {
 
 	partes := strings.Split(str, ".")
 	if len(partes) > 2 {
-		return 0, gko.ErrDatoInvalido().Msgf("más de 1 punto para centavos: '%s'", str)
+		return 0, gko.ErrDatoInvalido.Msgf("más de 1 punto para centavos: '%s'", str)
 	}
 	pesos := partes[0]
 	centavos := ""
@@ -55,13 +55,13 @@ func ToCentavos(txt string) (int, error) {
 	case 2:
 		str = pesos + centavos
 	default:
-		return 0, gko.ErrDatoInvalido().
+		return 0, gko.ErrDatoInvalido.
 			Msgf("solo puede haber centavos luego del punto: '%s'", centavos)
 	}
 
 	res, err := strconv.Atoi(str)
 	if err != nil {
-		return 0, gko.ErrDatoInvalido().Msgf("número inválido: '%s'", str)
+		return 0, gko.ErrDatoInvalido.Msgf("número inválido: '%s'", str)
 	}
 	return res, nil
 }

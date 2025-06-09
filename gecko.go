@@ -87,7 +87,7 @@ func NewSinRoot404() *Gecko {
 // Iniciar servidor HTTP: escuchar en puerto TCP.
 func (g *Gecko) IniciarEnPuerto(port int) error {
 	if port < 1 || port > 65535 {
-		return gko.ErrDatoInvalido().Msg("puerto TCP inválido")
+		return gko.ErrDatoInvalido.Msg("puerto TCP inválido")
 	}
 	// Manejar terminación del servidor
 	signalChan := make(chan os.Signal, 1)
@@ -117,7 +117,7 @@ func (g *Gecko) IniciarEnPuerto(port int) error {
 // Iniciar servidor HTTP: escuchar en unix domain socket.
 func (g *Gecko) IniciarEnSocket(socket string) error {
 	if socket == "" {
-		return gko.ErrDatoIndef().Msg("socket path indefinido")
+		return gko.ErrDatoIndef.Msg("socket path indefinido")
 	}
 	// Manejar terminación del servidor
 	signalChan := make(chan os.Signal, 1)

@@ -27,7 +27,7 @@ func fsFile(c *Context, fpath string, filesystem fs.FS) error {
 		if !errors.Is(err, fs.ErrNotExist) {
 			gko.Err(err).Op("fsFile.Stat('" + fpath + "')").Log()
 		}
-		return gko.ErrNoEncontrado()
+		return gko.ErrNoEncontrado
 	}
 	// Si es un directorio se sirve el index.html
 	if fi.IsDir() {
@@ -37,13 +37,13 @@ func fsFile(c *Context, fpath string, filesystem fs.FS) error {
 	file, err := filesystem.Open(fpath)
 	if err != nil {
 		gko.Err(err).Op("fsFile.Open('" + fpath + "')").Log()
-		return gko.ErrNoEncontrado()
+		return gko.ErrNoEncontrado
 	}
 	defer file.Close()
 	// Enviar el archivo.
 	ff, ok := file.(io.ReadSeeker)
 	if !ok {
-		return gko.ErrInesperado().Str("file does not implement io.ReadSeeker")
+		return gko.ErrInesperado.Str("file does not implement io.ReadSeeker")
 	}
 	http.ServeContent(c.response, c.request, fi.Name(), fi.ModTime(), ff)
 	return nil
@@ -52,7 +52,7 @@ func fsFile(c *Context, fpath string, filesystem fs.FS) error {
 // Se servirá el index.html si existe en el directorio fpath.
 func fsDirIndex(c *Context, fpath string, fi fs.FileInfo, filesystem fs.FS) error {
 	if !fi.IsDir() {
-		return gko.ErrInesperado().Str("fpath is not a directory")
+		return gko.ErrInesperado.Str("fpath is not a directory")
 	}
 	fpath = filepath.ToSlash(filepath.Join(fpath, "index.html"))
 	// Abrir el archivo.
@@ -61,13 +61,13 @@ func fsDirIndex(c *Context, fpath string, fi fs.FileInfo, filesystem fs.FS) erro
 		if !errors.Is(err, fs.ErrNotExist) {
 			gko.Err(err).Op("fsDirIndex.Open('" + fpath + "')").Log()
 		}
-		return gko.ErrNoEncontrado()
+		return gko.ErrNoEncontrado
 	}
 	defer file.Close()
 	// Enviar el archivo.
 	ff, ok := file.(io.ReadSeeker)
 	if !ok {
-		return gko.ErrInesperado().Str("file does not implement io.ReadSeeker")
+		return gko.ErrInesperado.Str("file does not implement io.ReadSeeker")
 	}
 	http.ServeContent(c.response, c.request, fi.Name(), fi.ModTime(), ff)
 	return nil
@@ -139,7 +139,7 @@ func (g *Gecko) FileAbs(path, fpath string) {
 		file, err := os.Open(fpath)
 		if err != nil {
 			gko.Err(err).Op("FileAbs.Open('" + fpath + "')").Log()
-			return gko.ErrNoEncontrado()
+			return gko.ErrNoEncontrado
 		}
 		defer file.Close()
 		http.ServeContent(c.response, c.request, fi.Name(), fi.ModTime(), file)

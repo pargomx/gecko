@@ -18,7 +18,7 @@ func (c *Context) RefreshHTMX() error {
 // Redirigir al cliente con un código 300-308 y header "Location".
 func (c *Context) RedirCode(code int, url string) error {
 	if code < 300 || code > 308 {
-		return gko.ErrInesperado().Str("redirect inválido").Ctx("code", code)
+		return gko.ErrInesperado.Str("redirect inválido").Ctx("code", code)
 	}
 	c.response.Header().Set(HeaderLocation, url)
 	c.response.WriteHeader(code)
@@ -29,7 +29,7 @@ func (c *Context) RedirCode(code int, url string) error {
 // Utilizar fmt.Sprintf para construir el url.
 func (c *Context) RedirCodef(code int, format string, a ...any) error {
 	if code < 300 || code > 308 {
-		return gko.ErrInesperado().Str("redirect inválido").Ctx("code", code)
+		return gko.ErrInesperado.Str("redirect inválido").Ctx("code", code)
 	}
 	c.response.Header().Set(HeaderLocation, fmt.Sprintf(format, a...))
 	c.response.WriteHeader(code)

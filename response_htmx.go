@@ -76,7 +76,7 @@ func (c *Context) AskedForFallback(fallbackRedir string, a ...any) error {
 		return c.StringOk("Ok")
 	}
 
-	return gko.ErrDatoInvalido().Strf("askfor invalid: %v", askfor)
+	return gko.ErrDatoInvalido.Strf("askfor invalid: %v", askfor)
 }
 
 // Responder con lo especificado en el cliente mediante el
@@ -119,5 +119,5 @@ func (c *Context) AskedFor(msg string) error {
 		return c.StringOk(msg)
 	}
 
-	return gko.ErrDatoInvalido().Strf("askfor invalid: %v", askfor)
+	return gko.ErrDatoInvalido.Strf("askfor invalid: %v", askfor)
 }

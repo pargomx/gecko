@@ -19,7 +19,7 @@ type Renderer interface {
 // y responder con MIME "text/html" y el status "code".
 func (c *Context) Render(code int, name string, data any) error {
 	if c.gecko.Renderer == nil {
-		return gko.ErrNoDisponible().Str("gecko: renderer nulo")
+		return gko.ErrNoDisponible.Str("gecko: renderer nulo")
 	}
 	buf := new(bytes.Buffer)
 	err := c.gecko.Renderer.Render(buf, name, data, c)
@@ -50,7 +50,7 @@ func (c *Context) Render(code int, name string, data any) error {
 // el layout para ser una página HTML completa.
 func (c *Context) RenderOk(name string, data map[string]any) error {
 	if c.gecko.Renderer == nil {
-		return gko.ErrNoDisponible().Str("gecko: renderer nulo")
+		return gko.ErrNoDisponible.Str("gecko: renderer nulo")
 	}
 	if data == nil {
 		data = map[string]any{}
@@ -121,7 +121,7 @@ func (c *Context) RenderOk(name string, data map[string]any) error {
 // Renderiza en #maincontent para htmx y en .Contenido par navegador.
 func (c *Context) RenderContenido(name string, data map[string]any) error {
 	if c.gecko.Renderer == nil {
-		return gko.ErrNoDisponible().Str("gecko: renderer nulo")
+		return gko.ErrNoDisponible.Str("gecko: renderer nulo")
 	}
 	if data == nil {
 		data = map[string]any{}
@@ -164,7 +164,7 @@ func (c *Context) RenderContenido(name string, data map[string]any) error {
 
 func (c *Context) RenderCard(name string, data map[string]any) error {
 	if c.gecko.Renderer == nil {
-		return gko.ErrNoDisponible().Str("gecko: renderer nulo")
+		return gko.ErrNoDisponible.Str("gecko: renderer nulo")
 	}
 	if data == nil {
 		data = map[string]any{}

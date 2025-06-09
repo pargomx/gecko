@@ -59,7 +59,7 @@ var pragmaConfig = "?_pragma=foreign_keys(0)&_busy_timeout=1000"
 func NewLogger(dbPath string, flushFreq time.Duration) (*logger, error) {
 	op := gko.Op("logsqlite.NewLogger").Ctx("db", dbPath).Ctx("flushFreq", flushFreq)
 	if dbPath == "" {
-		return nil, op.ErrDatoIndef().Str("db no especificada")
+		return nil, op.E(gko.ErrDatoIndef).Str("db no especificada")
 	}
 	if flushFreq < time.Second { // Mínimo 1s de intervalo.
 		flushFreq = time.Second * 5 // Default 5s.
@@ -187,7 +187,7 @@ func (l *logger) flushBufferToDB() {
 func (l *logger) insertLogHTTP(tx *sql.Tx, entr gecko.LogEntry) error {
 	const op string = "insertLogHTTP"
 	if entr.Timestamp.IsZero() {
-		return gko.ErrDatoIndef().Op(op).Msg("Timestamp sin especificar").Str("pk_indefinida")
+		return gko.ErrDatoIndef.Msg("Timestamp sin especificar").Op(op).Str("pk_indefinida")
 	}
 	_, err := tx.Exec("INSERT INTO loghttp "+
 		"(timestamp, host, method, ruta, uri, htmx, status, latency, bytes_in, bytes_out, error, remote_ip, sesion, user_agent, referer, hx_current_url, hx_target, hx_trigger, hx_boosted) "+
@@ -207,7 +207,7 @@ func (l *logger) insertLogHTTP(tx *sql.Tx, entr gecko.LogEntry) error {
 				gko.LogWarn("too many retries in http log")
 			}
 		} else {
-			return gko.ErrAlEscribir().Err(err).Op(op)
+			return gko.ErrAlEscribir.Err(err).Op(op)
 		}
 	}
 	return nil
