@@ -1,38 +1,38 @@
 package gko
 
 func (e *Error) GetCodigoHTTP() int {
-	switch e.tipo {
-	case tipoErrInesperado:
+	switch {
+	case e.Contiene(ErrInesperado):
 		return 500
-	case tipoErrNoEncontrado:
+	case e.Contiene(ErrNoEncontrado):
 		return 404
-	case tipoErrYaExiste:
+	case e.Contiene(ErrYaExiste):
 		return 409
-	case tipoErrHayHuerfanos:
+	case e.Contiene(ErrHayHuerfanos):
 		return 409
-	case tipoErrTooManyReq:
+	case e.Contiene(ErrTooManyReq):
 		return 429
-	case tipoErrTooBig:
+	case e.Contiene(ErrTooBig):
 		return 400
-	case tipoErrTooLong:
+	case e.Contiene(ErrTooLong):
 		return 400
-	case tipoErrDatoIndef:
+	case e.Contiene(ErrDatoIndef):
 		return 400
-	case tipoErrDatoInvalido:
+	case e.Contiene(ErrDatoInvalido):
 		return 400
-	case tipoErrNoSoportado:
+	case e.Contiene(ErrNoSoportado):
 		return 415
-	case tipoErrNoAutorizado:
+	case e.Contiene(ErrNoAutorizado):
 		return 403
-	case tipoErrTimeout:
+	case e.Contiene(ErrTimeout):
 		return 408
-	case tipoErrNoDisponible:
+	case e.Contiene(ErrNoDisponible):
 		return 503
-	case tipoErrNoSpaceLeft:
+	case e.Contiene(ErrNoSpaceLeft):
 		return 507
-	case tipoErrAlEscribir:
+	case e.Contiene(ErrAlEscribir):
 		return 503
-	case tipoErrAlLeer:
+	case e.Contiene(ErrAlLeer):
 		return 503
 	default:
 		return 500
@@ -40,8 +40,8 @@ func (e *Error) GetCodigoHTTP() int {
 }
 
 func EsErrNotFound(err error) bool {
-	return Err(err).tipo == tipoErrNoEncontrado
+	return Err(err).Contiene(ErrNoEncontrado)
 }
 func EsErrAlreadyExists(err error) bool {
-	return Err(err).tipo == tipoErrYaExiste
+	return Err(err).Contiene(ErrYaExiste)
 }

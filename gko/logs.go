@@ -104,8 +104,8 @@ func (e *Error) FatalExit() {
 // No está pensado para el usuario porque da mucha información.
 func (e *Error) Error() string {
 	msg := ""
-	if e.tipo > 0 {
-		msg += fmt.Sprintf("[%d]", e.tipo)
+	if len(e.errKeys) > 0 {
+		msg += string(e.ErrorKey())
 	}
 	if e.operación != "" {
 		msg += " " + e.operación
@@ -131,13 +131,13 @@ func (e *Error) Error() string {
 // Imprime el error como estructura con toda su información.
 func (e *Error) Print() {
 	fmt.Printf("gko.Error{"+
-		"\n\ttipo: "+cPurple+"%d"+reset+
+		"\n\tkey: "+cPurple+"%v"+reset+
 		"\n\tmsg: "+cPurple+"%s"+reset+
 		"\n\tops: "+cPurple+"%s"+reset+
 		"\n\tctx: "+cPurple+"%s"+reset+
 		"\n\ttxt: "+cPurple+"%v"+reset+
 		"\n}\n",
-		e.tipo, e.mensaje, e.operación, e.valores, e.texto,
+		e.errKeys, e.mensaje, e.operación, e.valores, e.texto,
 	)
 }
 
@@ -147,8 +147,8 @@ func (e *Error) GetMensaje() string {
 		return e.mensaje + "."
 	} else if e.texto != "" {
 		return e.texto
-	} else if e.tipo > 0 {
-		return fmt.Sprintf("Error %d", e.tipo)
+	} else if len(e.errKeys) > 0 {
+		return fmt.Sprintf("Error %s", e.ErrorKey())
 	}
 	return "Hubo un error, por favor contacta a soporte."
 }
@@ -164,10 +164,10 @@ func (e *Error) Log() {
 	// 2020-11-25 18:54:32
 	msg := timestamp()
 	// 2020-11-25 18:54:32 [ERROR] (404)
-	if e.tipo == 0 {
+	if len(e.errKeys) == 0 {
 		msg += bRed + "[ERROR]" + reset
 	} else {
-		msg += bRed + fmt.Sprintf("[ERROR] (%d)", e.tipo) + reset
+		msg += bRed + fmt.Sprintf("[ERROR] %v", e.ErrorKey()) + reset
 	}
 	// 2020-11-25 18:54:32 [ERROR] (404) DoSomething > GetRecord
 	if e.operación != "" {
@@ -193,10 +193,10 @@ func (e *Error) Alert() {
 	// 2020-11-25 18:54:32
 	msg := timestamp()
 	// 2020-11-25 18:54:32 [ALERT] (404)
-	if e.tipo == 0 {
+	if len(e.errKeys) == 0 {
 		msg += bYellow + "[ALERT]" + reset
 	} else {
-		msg += bYellow + fmt.Sprintf("[ALERT] (%d)", e.tipo) + reset
+		msg += bYellow + fmt.Sprintf("[ALERT] %v", e.ErrorKey()) + reset
 	}
 	// 2020-11-25 18:54:32 [ALERT] (404) DoSomething > GetRecord
 	if e.operación != "" {
