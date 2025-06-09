@@ -4,6 +4,11 @@ import (
 	"io"
 )
 
+// Agregar un header a la respuesta.
+func (c *Context) HeaderAdd(key string, value string) {
+	c.response.Header().Add(key, value)
+}
+
 // Responder con status code y MIME "text/html" UTF8.
 func (c *Context) HTML(code int, html string) (err error) {
 	return c.Blob(code, MIMETextHTMLCharsetUTF8, []byte(html))
