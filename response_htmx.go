@@ -23,6 +23,16 @@ func (c *Context) TriggerEventoHTMX(evento string) {
 }
 
 // ================================================================ //
+// ========== ConfirmationDialog ================================== //
+
+func (c *Context) ConfirmationDialog(templateName string, data map[string]any) error {
+	c.HeaderAdd("HX-Retarget", "#confirmDialog")
+	c.HeaderAdd("HX-Reswap", "innerHTML")
+	c.TriggerEventoHTMX("confirmDialogLoaded")
+	return c.RenderOk(templateName, data)
+}
+
+// ================================================================ //
 // ========== Askfor ============================================== //
 
 // Responder con lo especificado en el cliente mediante el
