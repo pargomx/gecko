@@ -51,8 +51,8 @@ func (e evento) Msgf(format string, a ...any) evento {
 	return e
 }
 
-// Obtiene el mensaje para el usuari que describe al evento.
-func (e evento) GetMensaje(format string, a ...any) string {
+// Obtiene el mensaje para el usuario que describe al evento.
+func (e evento) GetMensaje() string {
 	return e.Mensaje
 }
 
