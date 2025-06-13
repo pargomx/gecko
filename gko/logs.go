@@ -3,6 +3,7 @@ package gko
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -183,7 +184,11 @@ func (e *Error) Log() {
 	}
 	// [ERROR] (404) DoSomething > GetRecord: Usuario no encontrado. {id=123} sql: no rows
 	if e.texto != "" {
-		msg += " " + rRed + e.texto
+		if strings.Contains(e.texto, "\n") {
+			msg += " " + rRed + "\n" + e.texto // Multiline errors start in new line.
+		} else {
+			msg += " " + rRed + e.texto
+		}
 	}
 	println(msg + reset)
 }
