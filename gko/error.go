@@ -332,6 +332,14 @@ func (e *Error) Op(op string) *Error {
 	return e
 }
 
+// Crea un nuevo gko.Error con la operación especificada.
+func (k ErrorKey) Op(op string) *Error {
+	e := &Error{
+		errKeys:   []ErrorKey{k},
+		operación: op}
+	return e
+}
+
 // ================================================================ //
 // ========== Al desarrollador - Ctx ============================== //
 
