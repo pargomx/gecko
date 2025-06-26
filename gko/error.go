@@ -143,6 +143,7 @@ type ErrorKey string
 // las capas más bajas de la aplicación (librerías externas) y pueda ser
 // identificado por las capas más altas (comandos de aplicación, handlers, UI).
 const (
+	ErrUserError    ErrorKey = "user_error"    // Error esperado provocado por el error.
 	ErrInesperado   ErrorKey = "inesperado"    // Error desconocido, normalmente de una dependencia externa.
 	ErrNoEncontrado ErrorKey = "not_found"     // No se encuentra un registro por su ID.
 	ErrYaExiste     ErrorKey = "ya_existe"     // Ya existe un recurson con el mismo ID.
