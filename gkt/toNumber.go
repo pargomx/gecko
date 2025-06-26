@@ -20,6 +20,12 @@ func ToInt(txt string) (int, error) {
 	return strconv.Atoi(SinEspaciosNinguno(txt))
 }
 
+// Retorna el valor en tipo entero, o cero si es un número inválido.
+func ToInt0(txt string) int {
+	num, _ := strconv.Atoi(SinEspaciosNinguno(txt))
+	return num
+}
+
 // Retorna el valor en tipo entero positivo de 8 bytes.
 // Valor máximo aceptado: 18446744073709551615.
 func ToUint64(txt string) (uint64, error) {
