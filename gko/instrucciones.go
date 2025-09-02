@@ -19,7 +19,7 @@ type Instruction struct {
 	argsStruct any
 
 	// Para dar información al usuario sobre lo que sucederá con su comando.
-	consecuencias []evento
+	consecuencias []Event
 
 	// Para dar información al usuario sobre lo que no sucederá.
 	advertencias []*Error
@@ -164,13 +164,13 @@ func (c *Instruction) CmdID() string {
 
 // Para dar información al usuario sobre lo que sucederá con el comando.
 // si se ejecuta con los argumentos proporcionados.
-func (c *Instruction) AddEffect(ev evento) *Instruction {
+func (c *Instruction) AddEffect(ev Event) *Instruction {
 	c.consecuencias = append(c.consecuencias, ev)
 	return c
 }
 
 // Para dar información al desarrollador sobre lo que sucederá con el comando.
-func (c *Instruction) AddDebug(ev evento) *Instruction {
+func (c *Instruction) AddDebug(ev Event) *Instruction {
 	if debugActive {
 		c.consecuencias = append(c.consecuencias, ev)
 	}
@@ -246,7 +246,7 @@ func (c *Instruction) HasMsg(key string) bool {
 // Devuelve todos los mensajes tipo Info y Debug (si debugActive).
 //
 // Usar HasEffect(key) para saber si hay alguna en específico.
-func (c *Instruction) Effects() []evento {
+func (c *Instruction) Effects() []Event {
 	return c.consecuencias
 }
 

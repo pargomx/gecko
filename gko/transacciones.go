@@ -5,13 +5,8 @@ package gko
 
 // Resultado de una transacción a nivel de aplicación.
 type TxResult struct {
-	Events []evento
+	Events []Event
 	Errors []*Error
-}
-
-// Agrega un evento al resultado.
-func (s *TxResult) Add(ev evento) {
-	s.Events = append(s.Events, ev)
 }
 
 // Agrega un potencial error al resultado.
