@@ -56,5 +56,7 @@ func logSQL(tipo uint8, qry string, args ...any) {
 		fmt.Println(bold + "[ROW]" + reset + " " + qry + ";")
 	case tipoExec:
 		fmt.Println(bold + "[EXE]" + reset + " " + qry + ";")
+	case tipoTX:
+		fmt.Println(bold + "[>TX]" + reset + " " + qry + ";")
 	}
 }
