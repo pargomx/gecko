@@ -23,7 +23,7 @@ var funcMap = template.FuncMap{
 	},
 	"resta": func(num ...int) int {
 		if len(num) == 0 {
-			fmt.Sprintln("WARN: Llamada func resta sin argumentos")
+			fmt.Println("WARN: Llamada func resta sin argumentos")
 			return 0
 		}
 		var res int
@@ -71,8 +71,10 @@ var funcMap = template.FuncMap{
 	"numeroEnLetras":   NumeroEnLetras,
 	"edad":             EdadPtr,
 	"timestamp":        timestamp,
-	"fechaCompleta":    FechaEsp,
-	"fechaCompletaHoy": func() string { return FechaEsp(time.Now()) },
+	"fechaCompleta":    func(t time.Time) string { return FechaEsp(t, true) },
+	"fechaCompletaHoy": func() string { return FechaEsp(time.Now(), true) },
+	"fechaCorta":       func(t time.Time) string { return FechaEsp(t, false) },
+	"fechaCortaHoy":    func() string { return FechaEsp(time.Now(), false) },
 	"minutosToString":  MinutosToString,
 	"segundosToString": SegundosToString,
 

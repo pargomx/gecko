@@ -21,7 +21,7 @@ func FechaText(f time.Time) string {
 
 // ================================================================ //
 
-func FechaEsp(f time.Time) string {
+func FechaEsp(f time.Time, año bool) string {
 	mes := ""
 	switch f.Month() {
 	case time.January:
@@ -51,7 +51,10 @@ func FechaEsp(f time.Time) string {
 	default:
 		mes = "error_en_mes"
 	}
-	return fmt.Sprintf("%v de %v de %v", f.Day(), mes, f.Year())
+	if año {
+		return fmt.Sprintf("%v de %v de %v", f.Day(), mes, f.Year())
+	}
+	return fmt.Sprintf("%v de %v", f.Day(), mes)
 }
 
 // ================================================================ //
