@@ -32,6 +32,12 @@ func ToUint64(txt string) (uint64, error) {
 	return strconv.ParseUint(SinEspaciosNinguno(txt), 10, 64)
 }
 
+// Retorna el valor en tipo entero positivo de 8 bytes.
+func ToUint(txt string) (uint, error) {
+	num, err := strconv.ParseUint(SinEspaciosNinguno(txt), 10, 64)
+	return uint(num), err
+}
+
 // Devuelve los centavos a partir de un string de dinero
 // que puede ser "$200.00", "200", "200.0" por ejemplo.
 //

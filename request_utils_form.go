@@ -48,12 +48,23 @@ func (c *Context) FormInt(name string) int {
 }
 
 // Valor del form convertido a uint64.
-func (c *Context) FormUintMust(name string) (uint64, error) {
+func (c *Context) FormUintMust(name string) (uint, error) {
+	return gkt.ToUint(c.request.FormValue(name))
+}
+
+// Valor del form convertido a uint64 sin verificar error (default 0).
+func (c *Context) FormUint(name string) uint {
+	num, _ := gkt.ToUint(c.request.FormValue(name))
+	return num
+}
+
+// Valor del form convertido a uint64.
+func (c *Context) FormUint64Must(name string) (uint64, error) {
 	return gkt.ToUint64(c.request.FormValue(name))
 }
 
 // Valor del form convertido a uint64 sin verificar error (default 0).
-func (c *Context) FormUint(name string) uint64 {
+func (c *Context) FormUint64(name string) uint64 {
 	num, _ := gkt.ToUint64(c.request.FormValue(name))
 	return num
 }

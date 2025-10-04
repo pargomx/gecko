@@ -46,12 +46,23 @@ func (c *Context) PathInt(name string) int {
 }
 
 // Valor del path convertido a uint64.
-func (c *Context) PathUintMust(name string) (uint64, error) {
+func (c *Context) PathUintMust(name string) (uint, error) {
+	return gkt.ToUint(c.Param(name))
+}
+
+// Valor del path convertido a uint64 sin verificar error (default 0).
+func (c *Context) PathUint(name string) uint {
+	num, _ := gkt.ToUint(c.Param(name))
+	return num
+}
+
+// Valor del path convertido a uint64.
+func (c *Context) PathUint64Must(name string) (uint64, error) {
 	return gkt.ToUint64(c.Param(name))
 }
 
 // Valor del path convertido a uint64 sin verificar error (default 0).
-func (c *Context) PathUint(name string) uint64 {
+func (c *Context) PathUint64(name string) uint64 {
 	num, _ := gkt.ToUint64(c.Param(name))
 	return num
 }
