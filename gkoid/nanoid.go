@@ -49,7 +49,7 @@ func NewPwd(size int) (string, error) {
 		return "", gko.Op("gkoid.NewPwd").Err(err)
 	}
 	id := make([]rune, size)
-	for i := 0; i < size; i++ {
+	for i := range size {
 		id[i] = alfabetoPwd[bytes[i]&maskPwd]
 	}
 	return string(id[:size]), nil
@@ -68,7 +68,7 @@ func New64(size int) (string, error) {
 		return "", gko.Op("gkoid.New64").Err(err)
 	}
 	id := make([]rune, size)
-	for i := 0; i < size; i++ {
+	for i := range size {
 		id[i] = alfabeto64[bytes[i]&mask64]
 	}
 	return string(id[:size]), nil
@@ -87,7 +87,7 @@ func New62(size int) (string, error) {
 		return "", gko.Op("gkoid.New62").Err(err)
 	}
 	id := make([]rune, size)
-	for i := 0; i < size; i++ {
+	for i := range size {
 		id[i] = alfabeto62[bytes[i]&mask62]
 	}
 	return string(id[:size]), nil
@@ -106,7 +106,7 @@ func New36(size int) (string, error) {
 		return "", gko.Op("gkoid.New36").Err(err)
 	}
 	id := make([]rune, size)
-	for i := 0; i < size; i++ {
+	for i := range size {
 		id[i] = alfabeto36[bytes[i]&mask36]
 	}
 	return string(id[:size]), nil
@@ -125,7 +125,7 @@ func New16(size int) (string, error) {
 		return "", gko.Op("gkoid.New16").Err(err)
 	}
 	id := make([]rune, size)
-	for i := 0; i < size; i++ {
+	for i := range size {
 		id[i] = alfabeto16[bytes[i]&mask16]
 	}
 	return string(id[:size]), nil
@@ -144,7 +144,7 @@ func NewNum(size int) (string, error) {
 		return "", gko.Op("gkoid.NewNum").Err(err)
 	}
 	id := make([]rune, size)
-	for i := 0; i < size; i++ {
+	for i := range size {
 		id[i] = alfabetoNum[bytes[i]&maskNum]
 	}
 	return string(id[:size]), nil
