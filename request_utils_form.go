@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pargomx/gecko/gko"
 	"github.com/pargomx/gecko/gkoid"
 	"github.com/pargomx/gecko/gkt"
 )
@@ -105,14 +106,26 @@ func (c *Context) FormTimeNullable(name string, layout string) (*time.Time, erro
 	return gkt.ToTimeNullable(c.request.FormValue(name), layout)
 }
 
-func (c *Context) FormDecimal(name string) (gkoid.Decimal, error) {
-	return gkoid.ParseDecimal(c.request.FormValue(name))
+func (c *Context) FormDecimal(name string) gkoid.Decimal {
+	id, err := gkoid.ParseDecimal(c.request.FormValue(name))
+	if err != nil {
+		gko.Err(err).Ctx("name", name).Log()
+	}
+	return id
 }
-func (c *Context) FormHex(name string) (gkoid.Hex, error) {
-	return gkoid.ParseHex(c.request.FormValue(name))
+func (c *Context) FormHex(name string) gkoid.Hex {
+	id, err := gkoid.ParseHex(c.request.FormValue(name))
+	if err != nil {
+		gko.Err(err).Ctx("name", name).Log()
+	}
+	return id
 }
-func (c *Context) FormAlfanum(name string) (gkoid.Alfanum, error) {
-	return gkoid.ParseAlfanum(c.request.FormValue(name))
+func (c *Context) FormAlfanum(name string) gkoid.Alfanum {
+	id, err := gkoid.ParseAlfanum(c.request.FormValue(name))
+	if err != nil {
+		gko.Err(err).Ctx("name", name).Log()
+	}
+	return id
 }
 
 // ================================================================ //
