@@ -3,6 +3,8 @@ package gecko
 import (
 	"time"
 
+	"github.com/pargomx/gecko/gko"
+	"github.com/pargomx/gecko/gkoid"
 	"github.com/pargomx/gecko/gkt"
 )
 
@@ -100,4 +102,26 @@ func (c *Context) PathTime(name string, layout string) (time.Time, error) {
 // Valor del path convertido a time, que puede estar indefinido.
 func (c *Context) PathTimeNullable(name string, layout string) (*time.Time, error) {
 	return gkt.ToTimeNullable(c.Param(name), layout)
+}
+
+func (c *Context) PathDecimal(name string) gkoid.Decimal {
+	id, err := gkoid.ParseDecimal(c.request.PathValue(name))
+	if err != nil {
+		gko.Err(err).Ctx("name", name).Log()
+	}
+	return id
+}
+func (c *Context) PathHex(name string) gkoid.Hex {
+	id, err := gkoid.ParseHex(c.request.PathValue(name))
+	if err != nil {
+		gko.Err(err).Ctx("name", name).Log()
+	}
+	return id
+}
+func (c *Context) PathAlfanum(name string) gkoid.Alfanum {
+	id, err := gkoid.ParseAlfanum(c.request.PathValue(name))
+	if err != nil {
+		gko.Err(err).Ctx("name", name).Log()
+	}
+	return id
 }

@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pargomx/gecko/gkoid"
 	"github.com/pargomx/gecko/gkt"
 )
 
@@ -102,6 +103,16 @@ func (c *Context) FormTime(name string, layout string) (time.Time, error) {
 // Valor del form convertido a time, que puede estar indefinido.
 func (c *Context) FormTimeNullable(name string, layout string) (*time.Time, error) {
 	return gkt.ToTimeNullable(c.request.FormValue(name), layout)
+}
+
+func (c *Context) FormDecimal(name string) (gkoid.Decimal, error) {
+	return gkoid.ParseDecimal(c.request.FormValue(name))
+}
+func (c *Context) FormHex(name string) (gkoid.Hex, error) {
+	return gkoid.ParseHex(c.request.FormValue(name))
+}
+func (c *Context) FormAlfanum(name string) (gkoid.Alfanum, error) {
+	return gkoid.ParseAlfanum(c.request.FormValue(name))
 }
 
 // ================================================================ //
