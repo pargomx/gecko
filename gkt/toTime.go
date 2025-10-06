@@ -215,3 +215,11 @@ func ToTimeNullable(txt, layout string) (*time.Time, error) {
 	}
 	return &tiempo, nil
 }
+
+// TimeToStringOrEmpty returns the formatted string of a *time.Time or empty if nil.
+func TimeToStringOrEmpty(t *time.Time, format string) string {
+	if t == nil {
+		return ""
+	}
+	return t.Format(format)
+}
