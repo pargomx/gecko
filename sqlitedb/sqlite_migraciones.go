@@ -385,7 +385,7 @@ func (s *SqliteDB) aplicarMigraciones(aplicadas map[[2]int]migracionAplicada, po
 	}()
 	for _, migra := range porAplicar {
 		// Ejecutar cada statement por separado para facilitar debug porque sqlite no da info.
-		statements := strings.Split(migra.contenido, ";")
+		statements := splitSQLStatements(migra.contenido)
 		for i, stmt := range statements {
 			stmt = strings.TrimSpace(stmt)
 			if stmt == "" {
@@ -495,18 +495,20 @@ func (s *SqliteDB) getMigracionesDisponibles(migracionesFS fs.FS) ([]migracionDi
 			return nil, op.Err(err).Op("getMigracionesFiles")
 		}
 		for _, file := range files {
-			if file.IsDir() || !strings.HasSuffix(file.Name(), ".sql") {
+			filename := file.Name()
+			if file.IsDir() || !strings.HasSuffix(filename, ".sql") {
 				continue // Ignore non-sql files and directories
 			}
-			if strings.HasPrefix(file.Name(), "_") {
+			if strings.HasPrefix(filename, "_") {
 				continue // Ignore files starting with underscore
 			}
-			minorStr := strings.Split(file.Name(), "_")[0]
+			filename = strings.ReplaceAll(filename, "-", "_") // Permitir 01-algo.sql
+			minorStr := strings.Split(filename, "_")[0]       // Permitir 01_algo.sql
 			minor, err := strconv.Atoi(minorStr)
 			if err != nil {
 				return nil, op.Err(err).Op("parseMinorVersion")
 			}
-			path := majorDir.Name() + "/" + file.Name()
+			path := majorDir.Name() + "/" + file.Name() // use original filename
 			bytes, err := fs.ReadFile(migracionesFS, path)
 			if err != nil {
 				return nil, op.Err(err).Op("readFile")
@@ -538,4 +540,44 @@ func getLastMajorDisponible(disponibes []migracionDisponible) int {
 		}
 	}
 	return max
+}
+
+// splitSQLStatements splits SQL script into statements, ignoring semicolons inside string literals.
+func splitSQLStatements(sql string) []string {
+	var stmts []string
+	var sb strings.Builder
+	inSingle, inDouble := false, false
+	escape := false
+
+	for i := 0; i < len(sql); i++ {
+		c := sql[i]
+		if c == '\'' && !inDouble && !escape {
+			inSingle = !inSingle
+		} else if c == '"' && !inSingle && !escape {
+			inDouble = !inDouble
+		}
+		if c == '\\' && (inSingle || inDouble) && !escape {
+			escape = true
+			sb.WriteByte(c)
+			continue
+		}
+		if c == ';' && !inSingle && !inDouble {
+			stmt := strings.TrimSpace(sb.String())
+			if stmt != "" {
+				stmts = append(stmts, stmt)
+			}
+			sb.Reset()
+		} else {
+			sb.WriteByte(c)
+		}
+		if escape && c != '\\' {
+			escape = false
+		}
+	}
+	// Add last statement if any
+	stmt := strings.TrimSpace(sb.String())
+	if stmt != "" {
+		stmts = append(stmts, stmt)
+	}
+	return stmts
 }
