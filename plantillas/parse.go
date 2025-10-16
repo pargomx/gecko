@@ -51,9 +51,9 @@ func findAndParseTemplates(tplsDir string, funcMap template.FuncMap) (*template.
 		}
 
 		// Normalizar separadores de ruta para evitar problemas en Windows.
-		normalizedPath := filepath.ToSlash(path)
+		nombre := filepath.ToSlash(path)
 
-		nombre := strings.TrimPrefix(normalizedPath, filepath.ToSlash(tplsDir))
+		nombre = strings.TrimPrefix(nombre, filepath.ToSlash(tplsDir))
 		nombre = strings.TrimPrefix(nombre, "/")     // ej. "/tpls/usu/hola.html" > "usu/hola.html"
 		nombre = strings.TrimSuffix(nombre, ".html") // ej. "usuario/nuevo.html" > "usuario/nuevo"
 
