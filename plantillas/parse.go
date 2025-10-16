@@ -2,6 +2,7 @@ package plantillas
 
 import (
 	"html/template"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
@@ -38,19 +39,21 @@ func findAndParseTemplates(tplsDir string, funcMap template.FuncMap) (*template.
 	// Plantilla de la cual colgarán todas.
 	rootTmpl := template.New("")
 
-	// TODO: Cambiar a WalkDir
 	// Escanear todos los archivos y subcarpetas.
-	err = filepath.Walk(tplsDir, func(path string, info os.FileInfo, errWalk error) error {
+	err = filepath.WalkDir(tplsDir, func(path string, d fs.DirEntry, errWalk error) error {
 		if errWalk != nil {
 			return errWalk
 		}
 
 		// Solo nos interesan archivos .html
-		if info.IsDir() || !strings.HasSuffix(path, ".html") {
+		if d.IsDir() || !strings.HasSuffix(path, ".html") {
 			return nil
 		}
 
-		nombre := strings.TrimPrefix(path, tplsDir)
+		// Normalizar separadores de ruta para evitar problemas en Windows.
+		normalizedPath := filepath.ToSlash(path)
+
+		nombre := strings.TrimPrefix(normalizedPath, filepath.ToSlash(tplsDir))
 		nombre = strings.TrimPrefix(nombre, "/")     // ej. "/tpls/usu/hola.html" > "usu/hola.html"
 		nombre = strings.TrimSuffix(nombre, ".html") // ej. "usuario/nuevo.html" > "usuario/nuevo"
 
