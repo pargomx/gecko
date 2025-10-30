@@ -5,6 +5,8 @@ import (
 	"math/rand/v2"
 	"reflect"
 	"time"
+
+	"github.com/pargomx/gecko/gkoid"
 )
 
 // ================================================================ //
@@ -35,20 +37,22 @@ type EventData interface {
 // Event representa la consecuencia de un comando y los parámetros
 // con los que fue ejecutado.
 type Event struct {
-	EventID  uint
-	EventKey EventKey
-	Fecha    time.Time
-	Data     EventData // Será serializado
-	Metadata []byte
+	EventID       uint
+	ResponsableID gkoid.Decimal
+	EventKey      EventKey
+	Fecha         time.Time
+	Data          EventData // Será serializado
+	Metadata      []byte
 }
 
 // RawEventRow corresponde a un elemento de la tabla 'eventos'.
 type RawEventRow struct {
-	EventID  uint      // `eventos.event_id`
-	EventKey EventKey  // `eventos.event_key`
-	Fecha    time.Time // `eventos.fecha`
-	Data     []byte    // `eventos.data`
-	Metadata []byte    // `eventos.metadata`
+	EventID       uint // `eventos.event_id`
+	ResponsableID gkoid.Decimal
+	EventKey      EventKey  // `eventos.event_key`
+	Fecha         time.Time // `eventos.fecha`
+	Data          []byte    // `eventos.data`
+	Metadata      []byte    // `eventos.metadata`
 }
 
 func (e Event) Mensaje() string {
@@ -76,7 +80,7 @@ type EventStoreRepo interface {
 // Key: identificador del evento. Ej. "usuario_registrado".
 // Data: estructura con los argumentos del evento que permite
 // reproducirlo o mostrar un mensaje.
-func (s *EventStore) Rise(key EventKey, data EventData) (*Event, error) {
+func (s *EventStore) Rise(responsableID gkoid.Decimal, key EventKey, data EventData) (*Event, error) {
 	op := Op("EventStore.Rise").Msg("Hubo un problema en el servidor")
 
 	val := reflect.ValueOf(data)
@@ -91,10 +95,11 @@ func (s *EventStore) Rise(key EventKey, data EventData) (*Event, error) {
 	ev := Event{
 		// Mask porque sqlite no soporta uint64,
 		// y para que en sqlite no aparezcan negativos.
-		EventID:  rand.Uint() & 0x7FFFFFFFFFFFFFFF, // TODO: overflows on 32bit systems
-		EventKey: key,
-		Fecha:    time.Now(), // TODO: always local?
-		Data:     data,
+		EventID:       rand.Uint() & 0x7FFFFFFFFFF,
+		ResponsableID: responsableID,
+		EventKey:      key,
+		Fecha:         time.Now(), // TODO: always local?
+		Data:          data,
 	}
 
 	// Serializar y guardar en repositorio.
@@ -104,10 +109,11 @@ func (s *EventStore) Rise(key EventKey, data EventData) (*Event, error) {
 			return nil, op.Err(err)
 		}
 		row := RawEventRow{
-			EventID:  ev.EventID,
-			EventKey: ev.EventKey,
-			Fecha:    ev.Fecha,
-			Data:     dataJson,
+			EventID:       ev.EventID,
+			ResponsableID: responsableID,
+			EventKey:      ev.EventKey,
+			Fecha:         ev.Fecha,
+			Data:          dataJson,
 		}
 		err = s.Repo.Guardar(row)
 		if err != nil {
@@ -198,10 +204,11 @@ func ParseEvent(row RawEventRow) (*Event, error) {
 	// Or ensure all EventData methods have pointer receivers.
 	// For JSON, it's common to unmarshal into a pointer to a struct.
 	return &Event{
-		EventID:  row.EventID,
-		EventKey: row.EventKey,
-		Fecha:    row.Fecha,
-		Data:     eventData,
+		EventID:       row.EventID,
+		ResponsableID: row.ResponsableID,
+		EventKey:      row.EventKey,
+		Fecha:         row.Fecha,
+		Data:          eventData,
 	}, nil
 }
 
