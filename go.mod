@@ -5,7 +5,6 @@ go 1.24.9
 require (
 	github.com/glebarez/go-sqlite v1.22.0
 	github.com/jtorz/num-a-letra v0.0.0-20190228064825-21346932aaa0
-	github.com/vmihailenco/msgpack/v5 v5.4.1
 	golang.org/x/text v0.30.0
 )
 
@@ -15,7 +14,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
-	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	golang.org/x/exp v0.0.0-20251009144603-d2f985daa21b // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	modernc.org/libc v1.66.10 // indirect
