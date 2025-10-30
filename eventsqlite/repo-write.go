@@ -5,9 +5,7 @@ import (
 	"github.com/pargomx/gecko/sqlitedb"
 )
 
-const formatoTimestamp = "2006-01-02 15:04:05.99999-07:00"
-
-func NuevoRepoWrite(db sqlitedb.Ejecutor) *RepoWrite {
+func (*EventRepoSqlite) NuevoRepoWrite(db sqlitedb.Ejecutor) *RepoWrite {
 	return &RepoWrite{
 		db: db,
 	}
@@ -29,9 +27,9 @@ func (s *RepoWrite) Guardar(ev gko.RawEventRow) error {
 		return gko.ErrDatoIndef.Str("required_sin_valor").Op(op).Msg("Fecha sin especificar")
 	}
 	_, err := s.db.Exec("INSERT INTO eventos "+
-		"(event_id, event_key, fecha, data, metadata) "+
-		"VALUES (?, ?, ?, ?, ?) ",
-		ev.EventID, ev.EventKey, ev.Fecha.Format(formatoTimestamp), ev.Data, ev.Metadata,
+		"(event_id, responsable_id, event_key, fecha, data, metadata) "+
+		"VALUES (?, ?, ?, ?, ?, ?) ",
+		ev.EventID, ev.ResponsableID, ev.EventKey, ev.Fecha.Format(formatoTimestamp), ev.Data, ev.Metadata,
 	)
 	if err != nil {
 		return gko.ErrAlEscribir.Err(err).Op(op)

@@ -9,7 +9,7 @@ import (
 	"github.com/pargomx/gecko/sqlitedb"
 )
 
-func NuevoRepoRead(db sqlitedb.Ejecutor) *RepoRead {
+func (*EventRepoSqlite) NuevoRepoRead(db sqlitedb.Ejecutor) *RepoRead {
 	return &RepoRead{
 		db: db,
 	}
@@ -31,8 +31,8 @@ type RepoRead struct {
 //	fecha,
 //	data,
 //	metadata
-const columnasEvento string = "event_id, event_key, fecha, data, metadata"
-const ColumnasEventoPrefix string = "ev.event_id, ev.event_key, ev.fecha, ev.data, ev.metadata"
+const columnasEvento string = "event_id, responsable_id, event_key, fecha, data, metadata"
+const ColumnasEventoPrefix string = "ev.event_id, ev.responsable_id, ev.event_key, ev.fecha, ev.data, ev.metadata"
 
 // Origen de los datos de gko.RawEventRow
 //
