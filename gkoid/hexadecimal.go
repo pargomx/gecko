@@ -2,10 +2,9 @@ package gkoid
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"math/big"
-
-	"github.com/pargomx/gecko/gko"
 )
 
 // Identificador que se presenta al usuario como hexadecimal de n caracteres
@@ -39,12 +38,11 @@ func (id Hex) String() string {
 // ================================================================ //
 
 func ParseHex(s string) (Hex, error) {
-	op := gko.Op("gko.ParseHex")
 	if len(s) == 0 {
-		return 0, op.Str("empty string")
+		return 0, errors.New("gkoid.ParseHex: empty string")
 	}
 	if len(s) > 16 {
-		return 0, op.Str("string too long")
+		return 0, errors.New("gkoid.ParseHex: string too long")
 	}
 	var id uint64
 	for _, c := range s {
@@ -57,7 +55,7 @@ func ParseHex(s string) (Hex, error) {
 		case 'A' <= c && c <= 'F':
 			v = byte(c - 'A' + 10)
 		default:
-			return 0, op.Str("invalid hex digit")
+			return 0, errors.New("gkoid.ParseHex: invalid hex digit")
 		}
 		id = (id << 4) | uint64(v)
 	}

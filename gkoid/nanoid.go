@@ -2,9 +2,9 @@ package gkoid
 
 import (
 	"crypto/rand"
+	"errors"
+	"fmt"
 	"math"
-
-	"github.com/pargomx/gecko/gko"
 )
 
 // ============================================================ //
@@ -41,12 +41,12 @@ const (
 //	"_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#$&%" // 69 chars
 func NewPwd(size int) (string, error) {
 	if size <= 0 {
-		return "", gko.Op("gkoid.NewPwd").Str("size must be positive")
+		return "", errors.New("gkoid.NewPwd: size must be positive")
 	}
 	bytes := make([]byte, size)
 	_, err := rand.Read(bytes)
 	if err != nil {
-		return "", gko.Op("gkoid.NewPwd").Err(err)
+		return "", fmt.Errorf("gkoid.NewPwd: %w", err)
 	}
 	id := make([]rune, size)
 	for i := range size {
@@ -60,12 +60,12 @@ func NewPwd(size int) (string, error) {
 //	"_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" // 64 chars
 func New64(size int) (string, error) {
 	if size <= 0 {
-		return "", gko.Op("gkoid.New64").Str("size must be positive")
+		return "", errors.New("gkoid.New64: size must be positive")
 	}
 	bytes := make([]byte, size)
 	_, err := rand.Read(bytes)
 	if err != nil {
-		return "", gko.Op("gkoid.New64").Err(err)
+		return "", fmt.Errorf("gkoid.New64: %w", err)
 	}
 	id := make([]rune, size)
 	for i := range size {
@@ -79,12 +79,12 @@ func New64(size int) (string, error) {
 //	"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" // 62 chars
 func New62(size int) (string, error) {
 	if size <= 0 {
-		return "", gko.Op("gkoid.New62").Str("size must be positive")
+		return "", errors.New("gkoid.New62: size must be positive")
 	}
 	bytes := make([]byte, size)
 	_, err := rand.Read(bytes)
 	if err != nil {
-		return "", gko.Op("gkoid.New62").Err(err)
+		return "", fmt.Errorf("gkoid.New62: %w", err)
 	}
 	id := make([]rune, size)
 	for i := range size {
@@ -98,12 +98,12 @@ func New62(size int) (string, error) {
 //	"0123456789abcdefghijklmnopqrstuvwxyz" // 36 chars
 func New36(size int) (string, error) {
 	if size <= 0 {
-		return "", gko.Op("gkoid.New36").Str("size must be positive")
+		return "", errors.New("gkoid.New36: size must be positive")
 	}
 	bytes := make([]byte, size)
 	_, err := rand.Read(bytes)
 	if err != nil {
-		return "", gko.Op("gkoid.New36").Err(err)
+		return "", fmt.Errorf("gkoid.New36: %w", err)
 	}
 	id := make([]rune, size)
 	for i := range size {
@@ -117,12 +117,12 @@ func New36(size int) (string, error) {
 //	"0123456789ABCDEF" // 16 chars
 func New16(size int) (string, error) {
 	if size <= 0 {
-		return "", gko.Op("gkoid.New16").Str("size must be positive")
+		return "", errors.New("gkoid.New16: size must be positive")
 	}
 	bytes := make([]byte, size)
 	_, err := rand.Read(bytes)
 	if err != nil {
-		return "", gko.Op("gkoid.New16").Err(err)
+		return "", fmt.Errorf("gkoid.New16: %w", err)
 	}
 	id := make([]rune, size)
 	for i := range size {
@@ -136,12 +136,12 @@ func New16(size int) (string, error) {
 //	"0123456789" // 10 chars
 func NewNum(size int) (string, error) {
 	if size <= 0 {
-		return "", gko.Op("gkoid.NewNum").Str("size must be positive")
+		return "", errors.New("gkoid.NewNum: size must be positive")
 	}
 	bytes := make([]byte, size)
 	_, err := rand.Read(bytes)
 	if err != nil {
-		return "", gko.Op("gkoid.NewNum").Err(err)
+		return "", fmt.Errorf("gkoid.NewNum: %w", err)
 	}
 	id := make([]rune, size)
 	for i := range size {
@@ -171,10 +171,10 @@ func NewCustom(alphabet string, size int) (string, error) {
 	chars := []rune(alphabet)
 
 	if len(alphabet) == 0 || len(alphabet) > 255 {
-		return "", gko.Op("gkoid.NewCustom").Str("alphabet must not be empty and contain no more than 255 chars")
+		return "", errors.New("gkoid.NewCustom: alphabet must not be empty and contain no more than 255 chars")
 	}
 	if size <= 0 {
-		return "", gko.Op("gkoid.NewCustom").Str("size must be positive")
+		return "", errors.New("gkoid.NewCustom: size must be positive")
 	}
 
 	mask := getMask(len(chars))
