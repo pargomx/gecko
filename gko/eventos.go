@@ -91,7 +91,7 @@ func (s *EventStore) Rise(key EventKey, data EventData) (*Event, error) {
 	ev := Event{
 		// Mask porque sqlite no soporta uint64,
 		// y para que en sqlite no aparezcan negativos.
-		EventID:  rand.Uint() & 0x7FFFFFFFFFFFFFFF,
+		EventID:  rand.Uint() & 0x7FFFFFFFFFFFFFFF, // TODO: overflows on 32bit systems
 		EventKey: key,
 		Fecha:    time.Now(), // TODO: always local?
 		Data:     data,
@@ -122,7 +122,7 @@ func (s *EventStore) Rise(key EventKey, data EventData) (*Event, error) {
 
 	// Log como fallback o si se configuró.
 	if (s.Results == nil && s.Repo == nil) || s.ConsoleLog {
-		LogInfof("%v %+v", key, data)
+		LogInfof("%v %+v", key, data.ToMsg(""))
 	}
 
 	// Nota: podríamos retornar solo el EventID...
