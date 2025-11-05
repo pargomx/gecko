@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/pargomx/gecko/gko"
+	"github.com/pargomx/gecko/gkoid"
 	"github.com/pargomx/gecko/sqlitedb"
 )
 
@@ -53,7 +54,7 @@ func ScanRowsEvento(rows *sql.Rows, op string) ([]gko.RawEventRow, error) {
 		ev := gko.RawEventRow{}
 		var fecha string
 		err := rows.Scan(
-			&ev.EventID, &ev.EventKey, &fecha, &ev.Data, &ev.Metadata,
+			&ev.EventID, &ev.ResponsableID, &ev.EventKey, &fecha, &ev.Data, &ev.Metadata,
 		)
 		if err != nil {
 			return nil, gko.ErrInesperado.Err(err).Op(op)
@@ -93,7 +94,7 @@ func (s *RepoRead) ListEventosByID(ids []uint) ([]gko.RawEventRow, error) {
 		args[i] = id
 	}
 	rows, err := s.db.Query("SELECT "+columnasEvento+" "+fromEvento+
-		"WHERE event_id IN ("+placeholders+")", args...)
+		"WHERE event_id IN ("+placeholders+") ORDER BY fecha DESC", args...)
 	if err != nil {
 		return nil, gko.ErrInesperado.Err(err).Op(op)
 	}
@@ -104,7 +105,19 @@ func (s *RepoRead) ListEventosByKey(eventKey gko.EventKey) ([]gko.RawEventRow, e
 	const op string = "ListEventosByKey"
 	rows, err := s.db.Query(
 		"SELECT "+columnasEvento+" "+fromEvento+
-			"WHERE event_key = ?", eventKey,
+			"WHERE event_key = ? ORDER BY fecha DESC", eventKey,
+	)
+	if err != nil {
+		return nil, gko.ErrInesperado.Err(err).Op(op)
+	}
+	return ScanRowsEvento(rows, op)
+}
+
+func (s *RepoRead) ListEventosByResponsableID(ResponsableID gkoid.Decimal) ([]gko.RawEventRow, error) {
+	const op string = "ListEventosByResponsableID"
+	rows, err := s.db.Query(
+		"SELECT "+columnasEvento+" "+fromEvento+
+			"WHERE responsable_id = ? ORDER BY fecha DESC", ResponsableID,
 	)
 	if err != nil {
 		return nil, gko.ErrInesperado.Err(err).Op(op)
@@ -124,7 +137,27 @@ func (s *RepoRead) ListEventosByKeys(keys ...gko.EventKey) ([]gko.RawEventRow, e
 		args[i] = key
 	}
 	rows, err := s.db.Query("SELECT "+columnasEvento+" "+fromEvento+
-		"WHERE event_key IN ("+placeholders+")", args...)
+		"WHERE event_key IN ("+placeholders+") ORDER BY fecha DESC", args...)
+	if err != nil {
+		return nil, gko.ErrInesperado.Err(err).Op(op)
+	}
+	return ScanRowsEvento(rows, op)
+}
+
+func (s *RepoRead) ListEventosByResponsableAndKeys(ResponsableID gkoid.Decimal, keys ...gko.EventKey) ([]gko.RawEventRow, error) {
+	const op string = "ListEventosByResponsableAndKeys"
+	if len(keys) == 0 {
+		return []gko.RawEventRow{}, nil
+	}
+	placeholders := strings.Repeat("?,", len(keys))
+	placeholders = strings.TrimSuffix(placeholders, ",")
+	args := make([]any, len(keys)+1)
+	args[0] = ResponsableID
+	for i, key := range keys {
+		args[i+1] = key
+	}
+	rows, err := s.db.Query("SELECT "+columnasEvento+" "+fromEvento+
+		"WHERE responsable_id = ? AND event_key IN ("+placeholders+") ORDER BY fecha DESC", args...)
 	if err != nil {
 		return nil, gko.ErrInesperado.Err(err).Op(op)
 	}
@@ -133,12 +166,12 @@ func (s *RepoRead) ListEventosByKeys(keys ...gko.EventKey) ([]gko.RawEventRow, e
 
 func (s *RepoRead) ListLastEventos(n int) ([]gko.RawEventRow, error) {
 	const op string = "ListLastEventos"
-	if n == 0 {
-		return nil, gko.ErrDatoInvalido.Str("no limit set")
+	if n < 0 {
+		return nil, gko.ErrDatoInvalido.Str("especifique un límite válido")
 	}
-	if n > 1000 {
-		return nil, gko.ErrDatoInvalido.Strf("limit to high: %v", n)
-	}
+	// if n > 100000 {
+	// 	return nil, gko.ErrDatoInvalido.Strf("limit to high: %v", n)
+	// }
 	rows, err := s.db.Query(
 		"SELECT "+columnasEvento+" "+fromEvento+
 			"ORDER BY fecha DESC LIMIT ?", n,
